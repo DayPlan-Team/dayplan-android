@@ -1,5 +1,6 @@
 package com.app.dayplan.terms
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -27,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.dayplan.api.auth.ApiAuthClient
+import com.app.dayplan.home.HomeActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentHashMap
 
 class TermsActivity : ComponentActivity() {
 
@@ -52,12 +55,7 @@ class TermsActivity : ComponentActivity() {
             coroutineScope.launch {
                 try {
 
-                    Log.i("요청 시도", "요청 중 ")
-
                     val response = ApiAuthClient.termsService.getTerms()
-
-                    Log.i("응답 도착", "응답 도착")
-
                     if (response.isSuccessful) {
                         response.body().let {
                             termsList = it!!.terms
@@ -93,7 +91,9 @@ class TermsActivity : ComponentActivity() {
 
     @Composable
     fun TermsListUI(termsList: List<Terms> = emptyList()) {
+        val coroutineScope = rememberCoroutineScope()
         var allSelected by remember { mutableStateOf(false) }
+        var termsAgreements by remember { mutableStateOf(mutableMapOf<Long, Boolean>()) }
 
         Column(
             modifier = Modifier
@@ -101,10 +101,13 @@ class TermsActivity : ComponentActivity() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val termCheckStates = remember { mutableStateListOf<Boolean>().apply { addAll(List(termsList.size) { false }) } }
+            val termCheckStates =
+                remember { mutableStateListOf<Boolean>().apply { addAll(List(termsList.size) { false }) } }
 
-            fun onTermCheckedChanged(index: Int, isChecked: Boolean) {
+            fun onTermCheckedChanged(terms: Terms, index: Int, isChecked: Boolean) {
                 termCheckStates[index] = isChecked
+                termsAgreements[terms.termsId.toLong()] = isChecked
+                Log.i("Checkbox Change", "TermId: ${terms.termsId}, IsChecked: $isChecked")
             }
 
             // 전체 약관이 체크되었는지 확인하는 함수
@@ -113,10 +116,14 @@ class TermsActivity : ComponentActivity() {
             }
 
             // "전체 선택" 체크박스의 변경을 처리하는 함수
-            fun onAllTermsCheckedChanged(isChecked: Boolean, states: MutableList<Boolean>) {
+            fun onAllTermsCheckedChanged(termsList: List<Terms>, isChecked: Boolean, states: MutableList<Boolean>) {
                 val modifiedStates = states.toMutableList()
                 modifiedStates.forEachIndexed { index, _ ->
                     modifiedStates[index] = isChecked
+                }
+                termsList.forEach {
+                    termsAgreements[it.termsId.toLong()] = isChecked
+                    Log.i("All Checkbox Change", "TermId: ${it.termsId}, IsChecked: $isChecked")
                 }
                 termCheckStates.clear()
                 termCheckStates.addAll(modifiedStates)
@@ -130,7 +137,7 @@ class TermsActivity : ComponentActivity() {
                     Text(text = term.content + if (term.mandatory) " (필수)" else " (선택)")
                     Checkbox(checked = isChecked, onCheckedChange = { newValue ->
                         // 여기서 termCheckStates를 직접 수정하지 않고, 기능을 분리해 별도의 함수를 사용합니다.
-                        onTermCheckedChanged(index, newValue)
+                        onTermCheckedChanged(term, index, newValue)
                         // 전체 선택 상태를 체크하는 로직도 별도의 함수로 분리할 수 있습니다.
                         allSelected = areAllTermsChecked(termCheckStates)
                     })
@@ -138,25 +145,60 @@ class TermsActivity : ComponentActivity() {
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "전체 선택")
                 Checkbox(checked = allSelected, onCheckedChange = { isChecked ->
-                    onAllTermsCheckedChanged(isChecked, termCheckStates)
+                    onAllTermsCheckedChanged(termsList, isChecked, termCheckStates)
                 })
             }
 
+            LaunchedEffect(key1 = Unit) { // key1은 API 호출이 한 번만 이루어지게 하는 역할
+                coroutineScope.launch {
+                    try {
+
+                    } catch (e: Exception) {
+                        Log.e("API Error = ", e.toString())
+                    }
+                }
+            }
+
+
             Button(
-                onClick = { upsertTermsAgreement() },
-                modifier = Modifier.align(Alignment.End)
+                onClick = {
+
+                    coroutineScope.launch {
+                        Log.i("Coroutine = ", "is Start")
+                        Log.i("termsAgreement = ", termsAgreements.toString())
+                        try {
+                            upsertTermsAgreement(
+                                TermsAgreements(termsAgreements.map {
+                                    TermsAgreement(it.key, it.value)
+                                })
+                            )
+                        } catch (e: Exception) {
+                            Log.e("API Error = ", e.toString())
+                        }
+                    }
+
+                }, modifier = Modifier.align(Alignment.End)
             ) {
                 Text("동의하기")
             }
         }
     }
 
-    private fun upsertTermsAgreement() {
+    private suspend fun upsertTermsAgreement(termsAgreements: TermsAgreements) {
+        Log.i("termsAgreements = ", termsAgreements.termsAgreements.toString())
+        val response = ApiAuthClient.termsService.upsetTermsAgreements(termsAgreements)
 
+        if (response.isSuccessful) {
+            Log.i("Response is Success", "Response is Success")
+            val intent = Intent(this@TermsActivity, HomeActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            Log.i("error", response.code().toString())
+        }
     }
 }
