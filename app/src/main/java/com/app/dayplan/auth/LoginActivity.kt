@@ -20,6 +20,7 @@ import com.app.dayplan.R
 import com.app.dayplan.api.notauth.ApiClient
 import com.app.dayplan.api.SocialType
 import com.app.dayplan.home.HomeActivity
+import com.app.dayplan.terms.TermsActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.SharedPreferencesHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -109,8 +110,8 @@ class LoginActivity : ComponentActivity() {
                         SharedPreferencesHelper.accessToken = it.accessToken
                         SharedPreferencesHelper.refreshToken = it.refreshToken
 
-                        // HomeActivity로 이동
-                        val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                        // TermsActivity 이동
+                        val intent = Intent(this@LoginActivity, TermsActivity::class.java)
                         startActivity(intent)
                         finish()
                     }

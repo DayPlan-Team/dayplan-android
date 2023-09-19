@@ -1,6 +1,7 @@
 package com.app.dayplan.api.auth
 
 import com.app.dayplan.api.ApiUtil
+import com.app.dayplan.api.notauth.ApiNotAuthService
 import com.app.dayplan.auth.AuthInterceptor
 import com.app.dayplan.util.SharedPreferencesHelper
 import okhttp3.OkHttpClient
@@ -18,5 +19,7 @@ object ApiAuthClient {
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+    val termsService: ApiTermsService = retrofit.create(ApiTermsService::class.java)
 
 }

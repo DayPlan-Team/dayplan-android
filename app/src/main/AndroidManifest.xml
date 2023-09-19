@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".auth.LoginActivity"></activity>
+        <activity android:name=".terms.TermsActivity"></activity>
         <activity android:name=".home.HomeActivity"></activity>
 
     </application>
