@@ -7,6 +7,7 @@ android {
     namespace = "com.app.dayplan"
     compileSdk = 33
 
+
     defaultConfig {
         applicationId = "com.app.dayplan"
         minSdk = 24
@@ -48,8 +49,12 @@ android {
 
 dependencies {
 
+    implementation("com.naver.maps:map-sdk:3.13.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha03")
+    implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
+    implementation("androidx.activity:activity-compose:1.3.0")
+
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
