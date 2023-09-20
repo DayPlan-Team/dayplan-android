@@ -11,7 +11,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Dayplan"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:foregroundServiceType="location"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="prz24s4qtp"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -26,8 +32,13 @@
         <activity android:name=".auth.LoginActivity"></activity>
         <activity android:name=".terms.TermsActivity"></activity>
         <activity android:name=".home.HomeActivity"></activity>
+        <activity android:name=".datecourse.DateCourseSettingActivity"></activity>
+        <activity android:name=".verify.VerifyActivity"></activity>
+        <activity android:name=".reissue.ReissueTokenActivity"></activity>
 
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 </manifest>
