@@ -14,8 +14,8 @@ object SharedPreferencesHelper {
     private const val LATITUDE_LOCATION = "latitude"
     private const val LONGITUDE_LOCATION = "longitude"
 
-    private const val DEFAULT_LATITUDE = 37.541f
-    private const val DEFAULT_LONGITUDE = 126.986f
+    private const val DEFAULT_LATITUDE = "37.541"
+    private const val DEFAULT_LONGITUDE = "126.986"
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -38,7 +38,7 @@ object SharedPreferencesHelper {
     }
 
     val grantedLocation: String
-        get() = sharedPreferences.getString(GRANTED_LOCATION, null) ?: ""
+        get() = sharedPreferences.getString(GRANTED_LOCATION, null) ?: GrantedLocation.DENIED.toString()
 
     var accessToken: String
         get() = sharedPreferences.getString(KEY_ACCESS_TOKEN, null) ?: ""
@@ -52,16 +52,16 @@ object SharedPreferencesHelper {
             sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, value).apply()
         }
 
-    var latitude: Float
-        get() = sharedPreferences.getFloat(LATITUDE_LOCATION, DEFAULT_LATITUDE)
+    var latitude: String
+        get() = sharedPreferences.getString(LATITUDE_LOCATION, null) ?: DEFAULT_LATITUDE
         set(value) {
-            sharedPreferences.edit().putFloat(LATITUDE_LOCATION, value).apply()
+            sharedPreferences.edit().putString(LATITUDE_LOCATION, value).apply()
         }
 
-    var longitude: Float
-        get() = sharedPreferences.getFloat(LONGITUDE_LOCATION, DEFAULT_LATITUDE)
+    var longitude: String
+        get() = sharedPreferences.getString(LONGITUDE_LOCATION, null) ?: DEFAULT_LONGITUDE
         set(value) {
-            sharedPreferences.edit().putFloat(LONGITUDE_LOCATION, value).apply()
+            sharedPreferences.edit().putString(LONGITUDE_LOCATION, value).apply()
         }
 
 }
