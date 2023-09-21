@@ -54,7 +54,7 @@ dependencies {
     implementation("androidx.security:security-crypto-ktx:1.1.0-alpha03")
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
     implementation("androidx.activity:activity-compose:1.3.0")
-
+    implementation("com.google.android.gms:play-services-location:18.0.0")
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")

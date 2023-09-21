@@ -1,36 +1,32 @@
 package com.app.dayplan
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import com.app.dayplan.auth.LoginActivity
-import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.permission.RequestLocationPermissionActivity
+import com.app.dayplan.util.GrantedLocation
 import com.app.dayplan.util.SharedPreferencesHelper
+import com.app.dayplan.util.startActivityAndFinish
 import com.app.dayplan.verify.VerifyActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val accessToken = SharedPreferencesHelper.accessToken
 
-        Log.i("accessToken = ", accessToken)
-
-        if (accessToken.isNotEmpty()) {
-            val intent = Intent(this, VerifyActivity::class.java)
-            startActivity(intent)
-            finish()
+        if (SharedPreferencesHelper.grantedLocation == GrantedLocation.DENIED.name) {
+            this.startActivityAndFinish(RequestLocationPermissionActivity::class.java)
         } else {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+            val accessToken = SharedPreferencesHelper.accessToken
 
-        setContent {
-            DayplanTheme {
+            Log.i("accessToken = ", accessToken)
 
+            if (accessToken.isNotEmpty()) {
+                this.startActivityAndFinish(VerifyActivity::class.java)
+            } else {
+                this.startActivityAndFinish(LoginActivity::class.java)
             }
         }
+
     }
 }
