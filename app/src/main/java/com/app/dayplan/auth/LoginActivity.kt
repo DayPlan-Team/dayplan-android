@@ -17,9 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.app.dayplan.R
-import com.app.dayplan.api.notauth.ApiClient
+import com.app.dayplan.api.notauth.ApiNotAuthClient
 import com.app.dayplan.api.SocialType
-import com.app.dayplan.home.HomeActivity
 import com.app.dayplan.terms.TermsActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.SharedPreferencesHelper
@@ -93,7 +92,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun sendTokenToServer(idToken: String) {
-        val call = ApiClient.apiNotAuthService.sendToken(
+        val call = ApiNotAuthClient.apiNotAuthService.sendToken(
             registrationId = SocialType.GOOGLE.registrationId,
             code = idToken
         )

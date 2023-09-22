@@ -27,6 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.dayplan.datecourse.DateCourseSettingActivity
 import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.userlocation.UserLocationActivity
+import com.app.dayplan.util.startActivityAndFinish
 
 class HomeActivity : ComponentActivity() {
 
@@ -73,8 +75,8 @@ class HomeActivity : ComponentActivity() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            RoundedBoxButton(text = "데이트 코스 짜기") { moveDateCourseStep() }
-            RoundedBoxButton(text = "데이트 코스 둘러보기") { moveDateCourseStep() }
+            RoundedBoxButton(text = "데이트 코스 짜기") { this@HomeActivity.startActivityAndFinish(UserLocationActivity::class.java) }
+            RoundedBoxButton(text = "데이트 코스 둘러보기") { this@HomeActivity.startActivityAndFinish(UserLocationActivity::class.java) }
         }
     }
 
@@ -89,12 +91,6 @@ class HomeActivity : ComponentActivity() {
         ) {
             Text(text)
         }
-    }
-
-    private fun moveDateCourseStep() {
-        val intent = Intent(this@HomeActivity, DateCourseSettingActivity::class.java)
-        startActivity(intent)
-        finish()
     }
 
     // 세 번째 섹션: 카테고리 박스 8개

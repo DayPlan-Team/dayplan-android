@@ -2,10 +2,7 @@ package com.app.dayplan.datecourse
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,12 +14,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
-import com.app.dayplan.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.userlocation.LocationViewModel
 
 class DateCourseSettingActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +31,14 @@ class DateCourseSettingActivity : FragmentActivity() {
         }
     }
 
-    @Preview
     @Composable
     fun LocationScreen() {
+
+        val viewModel: LocationViewModel = viewModel()
+        val city = viewModel.cityCodeState.value
+        if (city != null) {
+            Log.i("city = ", city.toString())
+        }
 
         Column(
             modifier = Modifier
@@ -55,9 +56,7 @@ class DateCourseSettingActivity : FragmentActivity() {
                 Spacer(modifier = Modifier.height(8.dp)) // 간격
                 // 구 이름
                 Column {
-                    Text(text = "서울시", style = MaterialTheme.typography.titleMedium)
-                    Text(text = "노원구", style = MaterialTheme.typography.bodyMedium)
-                    Text(text = "중랑구", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "테스트", style = MaterialTheme.typography.titleMedium)
                 }
             }
 
@@ -66,16 +65,23 @@ class DateCourseSettingActivity : FragmentActivity() {
                 modifier = Modifier.weight(8f),
                 contentAlignment = Alignment.Center
             ) {
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { context ->
-                        val view = LayoutInflater.from(context).inflate(R .layout.map_fragment_layout, null)
-                        // 이 부분에서 view 초기화 및 필요한 설정을 할 수 있습니다.
-                        Log.i("지도 로드: ", "지도 띄우기")
-                        view
-                    }
-                )
+                Log.i("text = ", "test")
             }
+
+//            Box(
+//                modifier = Modifier.weight(8f),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                AndroidView(
+//                    modifier = Modifier.fillMaxSize(),
+//                    factory = { context ->
+//                        val view = LayoutInflater.from(context).inflate(R .layout.map_fragment_layout, null)
+//                        // 이 부분에서 view 초기화 및 필요한 설정을 할 수 있습니다.
+//                        Log.i("지도 로드: ", "지도 띄우기")
+//                        view
+//                    }
+//                )
+//            }
 
 
         }

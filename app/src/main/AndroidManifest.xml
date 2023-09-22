@@ -30,6 +30,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".permission.RequestLocationPermissionActivity"></activity>
+        <activity android:name=".userlocation.UserLocationStartActivity"></activity>
         <activity android:name=".userlocation.UserLocationActivity"></activity>
         <activity android:name=".auth.LoginActivity"></activity>
         <activity android:name=".terms.TermsActivity"></activity>
@@ -37,7 +38,6 @@
         <activity android:name=".datecourse.DateCourseSettingActivity"></activity>
         <activity android:name=".verify.VerifyActivity"></activity>
         <activity android:name=".reissue.ReissueTokenActivity"></activity>
-
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
