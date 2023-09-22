@@ -37,7 +37,6 @@
         <activity android:name=".datecourse.DateCourseSettingActivity"></activity>
         <activity android:name=".verify.VerifyActivity"></activity>
         <activity android:name=".reissue.ReissueTokenActivity"></activity>
-
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

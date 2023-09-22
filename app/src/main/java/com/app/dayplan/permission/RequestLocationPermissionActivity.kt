@@ -6,19 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.UserLocationActivity
+import com.app.dayplan.userlocation.UserLocationStartActivity
 import com.app.dayplan.util.GrantedLocation
 import com.app.dayplan.util.SharedPreferencesHelper
-import com.app.dayplan.util.startActivityAndClearPrevious
 import com.app.dayplan.util.startActivityAndFinish
 
 class RequestLocationPermissionActivity : ComponentActivity() {
@@ -52,7 +46,7 @@ class RequestLocationPermissionActivity : ComponentActivity() {
                 }
             }
 
-            this.startActivityAndFinish(UserLocationActivity::class.java)
+            this.startActivityAndFinish(UserLocationStartActivity::class.java)
         }
 
         val requestPermission = {

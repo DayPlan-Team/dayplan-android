@@ -1,10 +1,8 @@
 package com.app.dayplan.api.auth
 
 import com.app.dayplan.api.ApiUtil
-import com.app.dayplan.api.notauth.ApiNotAuthService
 import com.app.dayplan.auth.AuthInterceptor
 import com.app.dayplan.auth.AuthReissueInterceptor
-import com.app.dayplan.util.SharedPreferencesHelper
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,6 +31,8 @@ object ApiAuthClient {
 
     val termsService: ApiTermsService = retrofit.create(ApiTermsService::class.java)
     val verifyService: ApiVerifyService = retrofit.create(ApiVerifyService::class.java)
-    val reissueService: ApiReissueService = retrofitReissue.create(ApiReissueService::class.java)
+    val locationGeocodeService: ApiLocationGeocodeService = retrofit.create(ApiLocationGeocodeService::class.java)
 
+
+    val reissueService: ApiReissueService = retrofitReissue.create(ApiReissueService::class.java)
 }

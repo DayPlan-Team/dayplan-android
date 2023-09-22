@@ -2,24 +2,26 @@ package com.app.dayplan.userlocation
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
-import com.app.dayplan.auth.LoginActivity
+import androidx.lifecycle.viewModelScope
+import com.app.dayplan.datecourse.DateCourseSettingActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.SharedPreferencesHelper
-import com.app.dayplan.util.startActivityAndClearPrevious
 import com.app.dayplan.util.startActivityAndFinish
-import com.app.dayplan.verify.VerifyActivity
-import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 
-class UserLocationActivity : ComponentActivity() {
+class UserLocationActivity: ComponentActivity() {
 
+    private val viewModel: LocationViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,13 +30,10 @@ class UserLocationActivity : ComponentActivity() {
                 GetLocation()
             }
         }
-
     }
-
     @Composable
     fun GetLocation() {
         val context = LocalContext.current
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         Log.i("get location = ", "location ...")
 
         if (ActivityCompat.checkSelfPermission(
@@ -45,29 +44,27 @@ class UserLocationActivity : ComponentActivity() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            LaunchedEffect(Unit) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        Log.d("Location", "Lat: ${it.latitude}, Lng: ${it.longitude}")
-                        SharedPreferencesHelper.latitude =  it.latitude.toString()
-                        SharedPreferencesHelper.longitude = it.longitude.toString()
 
-                        Log.d("sharedLocation", "Lat: ${SharedPreferencesHelper.latitude}, Lng: ${SharedPreferencesHelper.longitude}")
-                    }
-                }.addOnFailureListener { exception ->
-                    Log.e("LocationError", "Error fetching location: ${exception.message}")
-                }
+            val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+
+            val locationListener = LocationListener { location ->
+                SharedPreferencesHelper.latitude = location.latitude.toString()
+                SharedPreferencesHelper.longitude = location.longitude.toString()
+
+                val latitude = SharedPreferencesHelper.latitude.toDouble()
+                val longitude = SharedPreferencesHelper.longitude.toDouble()
+
+                viewModel.fetchCityCode(latitude, longitude)
             }
+
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                1000L,
+                10.0F,
+                locationListener
+            )
         }
-
-        val accessToken = SharedPreferencesHelper.accessToken
-
-        Log.i("accessToken = ", accessToken)
-
-        if (accessToken.isNotEmpty()) {
-            this.startActivityAndFinish(VerifyActivity::class.java)
-        } else {
-            this.startActivityAndFinish(LoginActivity::class.java)
-        }
+        // API 호출이 완료된 후에만 다음 액티비티로 이동
+        this.startActivityAndFinish(DateCourseSettingActivity::class.java)
     }
 }
