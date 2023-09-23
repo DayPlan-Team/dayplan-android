@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.UserLocationActivity
 import com.app.dayplan.util.startActivityAndFinish
 
 class HomeActivity : ComponentActivity() {
@@ -73,8 +73,8 @@ class HomeActivity : ComponentActivity() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            RoundedBoxButton(text = "데이트 코스 짜기") { this@HomeActivity.startActivityAndFinish(UserLocationActivity::class.java) }
-            RoundedBoxButton(text = "데이트 코스 둘러보기") { this@HomeActivity.startActivityAndFinish(UserLocationActivity::class.java) }
+            RoundedBoxButton(text = "데이트 코스 짜기") { this@HomeActivity.startActivityAndFinish(DateCourseLocationCitySettingActivity::class.java) }
+            RoundedBoxButton(text = "데이트 코스 둘러보기") { this@HomeActivity.startActivityAndFinish(DateCourseLocationCitySettingActivity::class.java) }
         }
     }
 
