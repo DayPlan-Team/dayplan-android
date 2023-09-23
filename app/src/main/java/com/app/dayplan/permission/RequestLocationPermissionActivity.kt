@@ -10,7 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.UserLocationStartActivity
+import com.app.dayplan.userlocation.UserInitialLocationActivity
 import com.app.dayplan.util.GrantedLocation
 import com.app.dayplan.util.SharedPreferencesHelper
 import com.app.dayplan.util.startActivityAndFinish
@@ -46,7 +46,7 @@ class RequestLocationPermissionActivity : ComponentActivity() {
                 }
             }
 
-            this.startActivityAndFinish(UserLocationStartActivity::class.java)
+            this.startActivityAndFinish(UserInitialLocationActivity::class.java)
         }
 
         val requestPermission = {

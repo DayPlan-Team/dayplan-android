@@ -59,6 +59,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    implementation("com.naver.maps:map-sdk:3.17.0")
+
     implementation("androidx.work:work-runtime-ktx:2.7.1")
 
     implementation("androidx.core:core-ktx:1.9.0")
