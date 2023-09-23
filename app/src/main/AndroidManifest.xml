@@ -34,7 +34,8 @@
         <activity android:name=".auth.LoginActivity"></activity>
         <activity android:name=".terms.TermsActivity"></activity>
         <activity android:name=".home.HomeActivity"></activity>
-        <activity android:name=".datecourse.DateCourseSettingActivity"></activity>
+        <activity android:name=".datecourse.DateCourseLocationCitySettingActivity"></activity>
+        <activity android:name=".datecourse.DateCourseLocationDistrictSettingActivity"></activity>
         <activity android:name=".verify.VerifyActivity"></activity>
         <activity android:name=".reissue.ReissueTokenActivity"></activity>
     </application>

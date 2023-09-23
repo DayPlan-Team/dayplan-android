@@ -32,7 +32,7 @@ object ApiAuthClient {
     val termsService: ApiTermsService = retrofit.create(ApiTermsService::class.java)
     val verifyService: ApiVerifyService = retrofit.create(ApiVerifyService::class.java)
     val locationGeocodeService: ApiLocationGeocodeService = retrofit.create(ApiLocationGeocodeService::class.java)
-
+    val locationService: ApiLocationService = retrofit.create(ApiLocationService::class.java)
 
     val reissueService: ApiReissueService = retrofitReissue.create(ApiReissueService::class.java)
 }

@@ -12,12 +12,10 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.viewModelScope
-import com.app.dayplan.datecourse.DateCourseSettingActivity
+import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.SharedPreferencesHelper
 import com.app.dayplan.util.startActivityAndFinish
-import kotlinx.coroutines.launch
 
 class UserLocationActivity: ComponentActivity() {
 
@@ -65,6 +63,6 @@ class UserLocationActivity: ComponentActivity() {
             )
         }
         // API 호출이 완료된 후에만 다음 액티비티로 이동
-        this.startActivityAndFinish(DateCourseSettingActivity::class.java)
+        this.startActivityAndFinish(DateCourseLocationCitySettingActivity::class.java)
     }
 }
