@@ -30,7 +30,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".permission.RequestLocationPermissionActivity"></activity>
-        <activity android:name=".userlocation.UserLocationStartActivity"></activity>
+        <activity android:name=".map.MapRegistrationActivity"></activity>
+        <activity android:name=".userlocation.UserInitialLocationActivity"></activity>
         <activity android:name=".auth.LoginActivity"></activity>
         <activity android:name=".terms.TermsActivity"></activity>
         <activity android:name=".home.HomeActivity"></activity>

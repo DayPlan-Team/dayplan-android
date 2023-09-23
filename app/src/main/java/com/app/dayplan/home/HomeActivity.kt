@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
+import com.app.dayplan.map.MapRegistrationActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.startActivityAndFinish
 
@@ -50,6 +51,7 @@ class HomeActivity : ComponentActivity() {
             AdvertisementSlider()
             DateCourseSection()
             CategorySection()
+            LocationRegistrationSection()
         }
     }
 
@@ -59,7 +61,7 @@ class HomeActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(140.dp)
                 .background(Color.Gray)
         ) {
             Text("광고 슬라이드", modifier = Modifier.align(Alignment.Center))
@@ -91,7 +93,7 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    // 세 번째 섹션: 카테고리 박스 8개
+    // 세 번째 섹션: 카테고리 박스 4개
     @Composable
     fun CategorySection() {
         Column(
@@ -109,16 +111,6 @@ class HomeActivity : ComponentActivity() {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                CategoryBox("카테고리 5")
-                CategoryBox("카테고리 6")
-                CategoryBox("카테고리 7")
-                CategoryBox("카테고리 8")
-            }
         }
     }
 
@@ -132,6 +124,30 @@ class HomeActivity : ComponentActivity() {
             Text(categoryName, modifier = Modifier.align(Alignment.Center))
         }
     }
+
+    @Composable
+    fun LocationRegistrationSection() {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            LocationRegistrationButton { this@HomeActivity.startActivityAndFinish(MapRegistrationActivity::class.java) }
+        }
+    }
+
+    @Composable
+    fun LocationRegistrationButton(onClickAction: () -> Unit) {
+        Button(
+            onClick = { onClickAction() },
+            modifier = Modifier
+                .padding(16.dp)
+                .background(Color.Blue, shape = RoundedCornerShape(20.dp)),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            Text("위치 등록 하기")
+        }
+    }
+
 
     @Preview(showBackground = true)
     @Composable
