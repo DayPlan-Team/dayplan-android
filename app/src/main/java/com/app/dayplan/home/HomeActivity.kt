@@ -1,6 +1,5 @@
 package com.app.dayplan.home
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.app.dayplan.datecourse.DateCourseSettingActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.userlocation.UserLocationActivity
 import com.app.dayplan.util.startActivityAndFinish
