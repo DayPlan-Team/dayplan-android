@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.app.dayplan"
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
@@ -29,12 +30,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".permission.RequestLocationPermissionActivity"></activity>
-        <activity android:name=".map.MapRegistrationActivity"></activity>
-        <activity android:name=".userlocation.UserInitialLocationActivity"></activity>
         <activity android:name=".auth.LoginActivity"></activity>
         <activity android:name=".terms.TermsActivity"></activity>
         <activity android:name=".home.HomeActivity"></activity>
+        <activity android:name=".permission.RequestLocationPermissionActivity"></activity>
+        <activity android:name=".map.MapRegistrationActivity"></activity>
+        <activity android:name=".userlocation.UserInitialLocationActivity"></activity>
         <activity android:name=".datecourse.DateCourseLocationCitySettingActivity"></activity>
         <activity android:name=".datecourse.DateCourseLocationDistrictSettingActivity"></activity>
         <activity android:name=".verify.VerifyActivity"></activity>

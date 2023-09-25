@@ -33,10 +33,10 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<UpdateLocationWorker>(10, TimeUnit.MINUTES)
-            .build()
-
-        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
+//        val periodicWorkRequest = PeriodicWorkRequestBuilder<UpdateLocationWorker>(100, TimeUnit.MINUTES)
+//            .build()
+//
+//        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
     }
 }

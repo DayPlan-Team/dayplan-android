@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -48,6 +49,9 @@ android {
 }
 
 dependencies {
+
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     implementation("com.naver.maps:map-sdk:3.13.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")

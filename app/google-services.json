@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "833986886547",
+    "project_id": "dayplan-dev",
+    "storage_bucket": "dayplan-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833986886547:android:db2ca2836b5db0efddc666",
+        "android_client_info": {
+          "package_name": "com.app.dayplan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "833986886547-7niqluss2rk9o8ar6d992mgikqifm9im.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.dayplan",
+            "certificate_hash": "adf0fa25e3f5ee46a7ea6a155a9979581fc135f9"
+          }
+        },
+        {
+          "client_id": "833986886547-u9hddjs9c7vtv6q9u9op9q2abnbqkmhf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2GUJ2BLRbg_aGjWFGzOr77JFUPkFgvYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "833986886547-u9hddjs9c7vtv6q9u9op9q2abnbqkmhf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

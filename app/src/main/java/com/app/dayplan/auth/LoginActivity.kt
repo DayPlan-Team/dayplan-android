@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.app.dayplan.R
-import com.app.dayplan.api.notauth.ApiNotAuthClient
 import com.app.dayplan.api.SocialType
+import com.app.dayplan.api.notauth.ApiNotAuthClient
 import com.app.dayplan.terms.TermsActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.SharedPreferencesHelper
@@ -41,6 +41,10 @@ class LoginActivity : ComponentActivity() {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             handleSignInResult(task)
         }
+
+//        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+//        Log.i("signInLauncher = ", "task")
+//        handleSignInResult(task)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,17 +85,22 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        Log.i("handleSign = ", "start")
         try {
             val account = completedTask.getResult(ApiException::class.java)
             val idToken = account?.idToken
+            Log.i("id token = ", idToken.toString())
             sendTokenToServer(idToken!!)
 
         } catch (e: ApiException) {
             Log.w("GoogleSignIn", "Google sign in failed", e)
+            Log.w("GoogleSignIn cause ", "Google sign in failed", e.cause)
+            Log.w("GoogleSignIn message", "Google sign in failed ${e.stackTrace}")
         }
     }
 
     private fun sendTokenToServer(idToken: String) {
+        Log.i("sendToken = ", "api")
         val call = ApiNotAuthClient.apiNotAuthService.sendToken(
             registrationId = SocialType.GOOGLE.registrationId,
             code = idToken
