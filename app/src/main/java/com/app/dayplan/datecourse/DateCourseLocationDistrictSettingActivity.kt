@@ -1,9 +1,11 @@
 package com.app.dayplan.datecourse
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,11 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.app.dayplan.api.auth.ApiAuthClient
 import com.app.dayplan.home.HomeBar
-import com.app.dayplan.step.StepActivity
+import com.app.dayplan.step.StepCategoryActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.startActivityAndFinish
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
     private val selectedCityCode: Long by lazy {
         intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
@@ -168,13 +171,6 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
                             .fillMaxWidth()
                             .hoverIndicator()
                             .clickable {
-//                                val context = this@DateCourseLocationDistrictSettingActivity.baseContext
-//                                val intent = Intent(context, StepActivity::class.java)
-//                                intent.putExtra("districtName", district.name)
-//                                intent.putExtra("districtCode", district.code)
-//                                intent.putExtra("cityName", intent.getStringExtra("cityName"))
-//                                intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
-//                                this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepActivity::class.java)
                                 applyStepAction(district)
                             }
                             .then(backgroundModifier)
@@ -189,12 +185,12 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
 
     private fun applyStepAction(district: Location) {
         val context = this@DateCourseLocationDistrictSettingActivity.baseContext
-        val intent = Intent(context, StepActivity::class.java)
+        val intent = Intent(context, StepCategoryActivity::class.java)
         intent.putExtra("districtName", district.name)
         intent.putExtra("districtCode", district.code)
         intent.putExtra("cityName", intent.getStringExtra("cityName"))
         intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
-        this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepActivity::class.java)
+        this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepCategoryActivity::class.java)
     }
 
 

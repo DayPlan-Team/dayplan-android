@@ -1,9 +1,11 @@
 package com.app.dayplan.step
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,37 +21,31 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.app.dayplan.datecourse.Location
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.LocationSettingSync
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.MapView
-import com.naver.maps.map.NaverMap
+import com.app.dayplan.util.startActivityAndFinish
 
-class StepActivity : ComponentActivity() {
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+class StepCategoryActivity : ComponentActivity() {
 
     private val selectedCityCode: Long by lazy {
         intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
@@ -67,6 +63,13 @@ class StepActivity : ComponentActivity() {
         intent.getStringExtra("districtName") ?: Location.DEFAULT_DISTRICT_NAME
     }
 
+    private val currentCategoryNumber: Int by lazy {
+        intent.getIntExtra("currentCategoryNumber", 1)
+    }
+
+    private val stepArray: ArrayList<Steps> by lazy {
+        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps> ?: arrayListOf()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,27 +90,40 @@ class StepActivity : ComponentActivity() {
         ) {
             TopBar()
             StepSection()
-            Divider(color = Color.Gray, thickness = 1.dp)
+            Divider(color = Color.Gray, thickness = 3.dp)
+            DateCourseCategoryThemeBox("카테고리를 선택 해주세요")
             CategorySection()
-            Divider(color = Color.Gray, thickness = 1.dp)
-            UserStayedLocationScreen()
-            HomeBar(this@StepActivity)
+            HomeBar(this@StepCategoryActivity)
         }
+    }
+
+    @Composable
+    fun DateCourseCategoryThemeBox(
+        text1: String,
+    ) {
+        Text(
+            text = text1,
+            style = TextStyle(fontWeight = FontWeight.Bold),
+        )
     }
 
 
     @Composable
     fun StepSection() {
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = "만나서 뭘 할까?",
+                text = "데이트 코스 선택",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, bottom = 16.dp),
-                style = TextStyle(fontWeight = FontWeight.Bold)
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
             )
 
             Row(
@@ -116,8 +132,13 @@ class StepActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .padding(start = 16.dp, bottom = 16.dp)
             ) {
-                WhereGoBox("step1")
-                WhereGoPlusBox()
+                for (idx in 1..currentCategoryNumber) {
+                    if (idx <= stepArray.lastIndex) {
+                        WhereAlreadySetGoBox("step${idx}")
+                    } else {
+                        WhereGoBox("step${idx}")
+                    }
+                }
             }
         }
     }
@@ -141,14 +162,14 @@ class StepActivity : ComponentActivity() {
     }
 
     @Composable
-    @Preview
-    fun WhereGoPlusBox() {
+    fun WhereAlreadySetGoBox(text: String) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .wrapContentSize()
+                .padding(start = 6.dp, bottom = 6.dp)
         ) {
-            Text(text = "") // 이 텍스트는 박스 위에 나타납니다.
+            Text(text = text) // 이 텍스트는 박스 위에 나타납니다.
             Box(
                 modifier = Modifier
                     .size(50.dp)
@@ -157,7 +178,7 @@ class StepActivity : ComponentActivity() {
                 contentAlignment = Alignment.Center  // 여기에 이 코드를 추가합니다.
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Default.Done,
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -172,20 +193,21 @@ class StepActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            DateCourseCategoryBox("카페", "커피 맛집, 디저트 맛집")
-            DateCourseCategoryBox("영화", "근처 영화관, 뮤지컬, 공연")
-            DateCourseCategoryBox("식사", "동네 유명 맛집")
-            DateCourseCategoryBox("액티비티", "전시, 체험, 원데이 클래스 등")
+            DateCourseCategoryBox(PlaceCategory.CAFE)
+            DateCourseCategoryBox(PlaceCategory.MOVIE_THEATER)
+            DateCourseCategoryBox(PlaceCategory.RESTAURANT)
+            DateCourseCategoryBox(PlaceCategory.ACTIVITY)
         }
     }
 
     @Composable
     fun DateCourseCategoryBox(
-        text1: String,
-        text2: String,
+        category: PlaceCategory,
     ) {
         Button(
-            onClick = { },
+            onClick = {
+                applyStepAction(category)
+            },
             modifier = Modifier
                 .padding(start = 16.dp, bottom = 16.dp)
                 .height(40.dp)
@@ -195,7 +217,7 @@ class StepActivity : ComponentActivity() {
                 contentColor = Color.Black,
             ),
         ) {
-            DateCourseCategoryText(text1, text2)
+            DateCourseCategoryText(category.koreanName, category.comment)
         }
     }
 
@@ -218,37 +240,30 @@ class StepActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun NaverMapView(
-        onMapReady: (NaverMap) -> Unit
-    ) {
-        AndroidView(
-            factory = { context ->
-                MapView(context).apply {
-                    onCreate(Bundle())
-                    getMapAsync { naverMap -> onMapReady(naverMap) }
-                }
-            },
-            modifier = Modifier
-                .height(300.dp)
+    private fun applyStepAction(placeCategory: PlaceCategory) {
+        val context = this@StepCategoryActivity.baseContext
+        val intent = Intent(context, StepCategoryActivity::class.java)
+        intent.putExtra("cityName", intent.getStringExtra("cityName"))
+        intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
+        intent.putExtra("districtName", intent.getStringExtra("districtName"))
+        intent.putExtra("districtCode", intent.getStringExtra("districtCode"))
+
+        val nextSteps = ArrayList<Steps>()
+        for (idx in 1..currentCategoryNumber) {
+            if (idx <= stepArray.lastIndex) {
+                nextSteps.add(stepArray[idx])
+            }
+        }
+        val nextCategoryNumber = currentCategoryNumber + 1
+        nextSteps.add(
+            Steps(
+                stepNumber = nextCategoryNumber,
+                stepCategory = placeCategory,
+            )
         )
-    }
+        intent.putExtra("currentCategoryNumber", nextCategoryNumber)
+        intent.putExtra("steps", nextSteps)
 
-    @Composable
-    fun UserStayedLocationScreen() {
-        val naverMapState = remember { mutableStateOf<NaverMap?>(null) }
-        val naverMap = naverMapState.value
-
-        NaverMapView { map ->
-            naverMapState.value = map
-        }
-
-        LocationSettingSync { latLng ->
-            Log.i("lating = ", latLng.toString())
-            Log.i("navermap is null = ", (naverMap == null).toString())
-
-            naverMap?.moveCamera(CameraUpdate.scrollTo(latLng))
-        }
-
+        this@StepCategoryActivity.startActivityAndFinish(StepLocationActivity::class.java)
     }
 }
