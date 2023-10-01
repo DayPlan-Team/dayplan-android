@@ -1,5 +1,6 @@
 package com.app.dayplan.datecourse
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -39,12 +40,18 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.app.dayplan.api.auth.ApiAuthClient
 import com.app.dayplan.home.HomeBar
+import com.app.dayplan.step.StepActivity
 import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.util.startActivityAndFinish
 import kotlinx.coroutines.launch
 
 class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
     private val selectedCityCode: Long by lazy {
         intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
+    }
+
+    private val selectedCityName: String by lazy {
+        intent.getStringExtra("cityName") ?: Location.DEFAULT_CITY_NAME
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -160,15 +167,36 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .hoverIndicator()
-                            .clickable {  }
+                            .clickable {
+//                                val context = this@DateCourseLocationDistrictSettingActivity.baseContext
+//                                val intent = Intent(context, StepActivity::class.java)
+//                                intent.putExtra("districtName", district.name)
+//                                intent.putExtra("districtCode", district.code)
+//                                intent.putExtra("cityName", intent.getStringExtra("cityName"))
+//                                intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
+//                                this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepActivity::class.java)
+                                applyStepAction(district)
+                            }
                             .then(backgroundModifier)
                     ) {
-                        Text(text = district.name, modifier = Modifier.padding(8.dp))
+                        Text(
+                            text = district.name, modifier = Modifier.padding(8.dp))
                     }
                 }
             }
         }
     }
+
+    private fun applyStepAction(district: Location) {
+        val context = this@DateCourseLocationDistrictSettingActivity.baseContext
+        val intent = Intent(context, StepActivity::class.java)
+        intent.putExtra("districtName", district.name)
+        intent.putExtra("districtCode", district.code)
+        intent.putExtra("cityName", intent.getStringExtra("cityName"))
+        intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
+        this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepActivity::class.java)
+    }
+
 
     @Composable
     fun Modifier.hoverIndicator(): Modifier {
@@ -176,7 +204,8 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
         val isHovered by interactionSource.collectIsHoveredAsState()
 
         val hoverColor = if (isHovered) Color.Blue else Color.Transparent
-        return this.indication(interactionSource, rememberRipple())
+        return this
+            .indication(interactionSource, rememberRipple())
             .background(hoverColor)
     }
 }
