@@ -107,13 +107,14 @@ class DateCourseLocationCitySettingActivity : FragmentActivity() {
                 }
 
                 else -> {
-                    CitiesCategoryScreen(cities = cities!!) { selectedCityCode ->
+                    CitiesCategoryScreen(cities = cities!!) { cityCode, cityName ->
                         // 여기서 LocationDistrictActivity로 이동하면서 selectedCityCode 전달
                         val intent = Intent(
                             context,
                             DateCourseLocationDistrictSettingActivity::class.java
                         ).apply {
-                            putExtra("cityCode", selectedCityCode)
+                            putExtra("cityCode", cityCode)
+                            putExtra("cityName", cityName)
                         }
                         context.startActivity(intent)
                     }
@@ -123,7 +124,7 @@ class DateCourseLocationCitySettingActivity : FragmentActivity() {
     }
 
     @Composable
-    fun CitiesCategoryScreen(cities: List<Location> = emptyList(), onCitySelected: (Long) -> Unit) {
+    fun CitiesCategoryScreen(cities: List<Location> = emptyList(), onCitySelected: (Long, String) -> Unit) {
         var selectedCityCode by remember { mutableStateOf<Long?>(null) }
         var query by remember { mutableStateOf("") } // 검색 쿼리를 저장하기 위한 상태 변수
 
@@ -169,7 +170,7 @@ class DateCourseLocationCitySettingActivity : FragmentActivity() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .hoverIndicator()
-                            .clickable { onCitySelected(city.code) }
+                            .clickable { onCitySelected(city.code, city.name) }
                             .then(backgroundModifier)
                     ) {
                         Text(text = city.name, modifier = Modifier.padding(8.dp))
