@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -75,8 +78,10 @@ class HomeActivity : ComponentActivity() {
             AdvertisementSlider()
             DateCourseSection()
             CategorySection()
+            Divider(color = Color.Gray, thickness = 1.dp)
+            WhereGoSection()
             LocationRegistrationSection()
-            HomeBar()
+            HomeBar(this@HomeActivity)
         }
     }
 
@@ -226,14 +231,24 @@ class HomeActivity : ComponentActivity() {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, bottom = 16.dp)
             ) {
-                CategoryBox("카테고리 1")
-                CategoryBox("카테고리 2")
-                CategoryBox("카테고리 3")
-                CategoryBox("카테고리 4")
+                CategoryBox("")
+                CategoryBox("")
+                CategoryBox("")
+                CategoryBox("")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, bottom = 16.dp)
+            ) {
+                CategoryBox("")
+                CategoryBox("")
+                CategoryBox("")
+                CategoryBox("")
+            }
         }
     }
 
@@ -241,7 +256,51 @@ class HomeActivity : ComponentActivity() {
     fun CategoryBox(categoryName: String) {
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(50.dp)
+                .background(Color.LightGray)
+        ) {
+            Text(categoryName, modifier = Modifier.align(Alignment.Center))
+        }
+    }
+
+    @Composable
+    fun WhereGoSection() {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "어디로 가시나요?",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp * 1.5f,
+                    )
+                }
+                Spacer(modifier = Modifier.width(15.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    WhereGoBox("") // CategoryBox에도 동일한 패딩을 적용해야합니다.
+                    WhereGoBox("")
+                    WhereGoBox("")
+                    WhereGoBox("")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+
+    @Composable
+    fun WhereGoBox(categoryName: String) {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
                 .background(Color.LightGray)
         ) {
             Text(categoryName, modifier = Modifier.align(Alignment.Center))
@@ -268,8 +327,12 @@ class HomeActivity : ComponentActivity() {
             onClick = { onClickAction() },
             modifier = Modifier
                 .padding(16.dp)
-                .background(Color.Blue, shape = RoundedCornerShape(20.dp)),
-            contentPadding = PaddingValues(16.dp)
+                .background(Color(0xFFF1F1F1), shape = RoundedCornerShape(20.dp)),
+            contentPadding = PaddingValues(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFF1F1F1),
+                contentColor = Color.Black,
+            )
         ) {
             Text("위치 등록 하기")
         }

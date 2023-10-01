@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.app.dayplan.api.auth.ApiAuthClient
+import com.app.dayplan.home.HomeBar
 import com.app.dayplan.ui.theme.DayplanTheme
 import kotlinx.coroutines.launch
 
@@ -51,8 +52,20 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
 
         setContent {
             DayplanTheme {
-                DistrictsScreen(selectedCityCode)
+                DateCourseLocationDistrictSettingScreen(selectedCityCode)
             }
+        }
+    }
+
+    @Composable
+    fun DateCourseLocationDistrictSettingScreen(cityCode: Long) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DistrictsScreen(cityCode)
+            HomeBar(this@DateCourseLocationDistrictSettingActivity)
         }
     }
 
@@ -79,7 +92,7 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
         }
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.height(700.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

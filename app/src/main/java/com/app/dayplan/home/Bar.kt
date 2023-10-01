@@ -2,6 +2,7 @@ package com.app.dayplan.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -28,9 +29,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.app.dayplan.R
+import com.app.dayplan.util.startActivityAndFinish
+import androidx.activity.ComponentActivity
 
 @Composable
-fun HomeBar() {
+fun HomeBar(activity: ComponentActivity) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,6 +46,7 @@ fun HomeBar() {
                 .size(26.dp)
         )
         HomeIcon(
+            activity = activity,
             modifier = Modifier
                 .size(26.dp)
         )
@@ -54,11 +58,14 @@ fun HomeBar() {
 }
 
 @Composable
-fun HomeIcon(modifier: Modifier = Modifier) {
+fun HomeIcon(activity: ComponentActivity, modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Default.Home,
         contentDescription = null,
-        tint = Color(0xFFCCCCCC)
+        tint = Color(0xFFCCCCCC),
+        modifier = modifier.clickable {
+            activity.startActivityAndFinish(HomeActivity::class.java)
+        }
     )
 }
 
