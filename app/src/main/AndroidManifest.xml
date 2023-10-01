@@ -42,7 +42,8 @@
         <activity android:name=".datecourse.DateCourseLocationDistrictSettingActivity"></activity>
         <activity android:name=".verify.VerifyActivity"></activity>
         <activity android:name=".reissue.ReissueTokenActivity"></activity>
-        <activity android:name=".step.StepActivity"></activity>
+        <activity android:name=".step.StepCategoryActivity"></activity>
+        <activity android:name=".step.StepLocationActivity"></activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
