@@ -41,10 +41,6 @@ class LoginActivity : ComponentActivity() {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             handleSignInResult(task)
         }
-
-//        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-//        Log.i("signInLauncher = ", "task")
-//        handleSignInResult(task)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
