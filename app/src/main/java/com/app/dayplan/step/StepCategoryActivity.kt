@@ -43,7 +43,7 @@ import com.app.dayplan.datecourse.Location
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.util.startActivityAndFinish
+import com.app.dayplan.util.IntentExtra
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepCategoryActivity : ComponentActivity() {
@@ -247,11 +247,11 @@ class StepCategoryActivity : ComponentActivity() {
     }
 
     private fun applyStepAction(context: Context, placeCategory: PlaceCategory) {
-        val intent = Intent(context, StepLocationActivity::class.java)
-        intent.putExtra("cityName", selectedCityName)
-        intent.putExtra("cityCode", selectedCityCode)
-        intent.putExtra("districtName", selectedDistrictName)
-        intent.putExtra("districtCode", selectedDistrictCode)
+        val intent = Intent(context, StepPlaceActivity::class.java)
+        intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
+        intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
+        intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
+        intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
 
         val locationSteps = ArrayList<Steps>()
         for (idx in 1..currentCategoryNumber) {
@@ -265,9 +265,9 @@ class StepCategoryActivity : ComponentActivity() {
                 stepCategory = placeCategory,
             )
         )
-        intent.putExtra("currentCategoryNumber", currentCategoryNumber)
-        intent.putExtra("steps", locationSteps)
 
+        intent.putExtra(IntentExtra.CURRENT_CATEGORY_NUMBER.key, currentCategoryNumber)
+        intent.putExtra(IntentExtra.STEPS.key, locationSteps)
         Log.i("category steps = ", locationSteps.size.toString())
 
         context.startActivity(intent)

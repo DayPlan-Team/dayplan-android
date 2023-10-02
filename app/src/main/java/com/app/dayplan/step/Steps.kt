@@ -9,4 +9,5 @@ data class Steps(
     val longitude: Double = 0.0,
     val placeName: String = "",
     val placeAddress: String = "",
+    val placeRoadAddress: String = "",
 ) : Serializable
