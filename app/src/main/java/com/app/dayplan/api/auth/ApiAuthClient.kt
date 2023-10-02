@@ -35,4 +35,6 @@ object ApiAuthClient {
     val locationService: ApiLocationService = retrofit.create(ApiLocationService::class.java)
 
     val reissueService: ApiReissueService = retrofitReissue.create(ApiReissueService::class.java)
+
+    val categoryPlaceService: ApiCategoryPlaceService = retrofit.create(ApiCategoryPlaceService::class.java)
 }

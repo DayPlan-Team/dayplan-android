@@ -24,8 +24,10 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.app.dayplan.api.auth.ApiAuthClient
 import com.app.dayplan.datecourse.Location
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
@@ -44,6 +47,8 @@ import com.app.dayplan.userlocation.LocationSettingSync
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepLocationActivity : ComponentActivity() {
@@ -65,7 +70,7 @@ class StepLocationActivity : ComponentActivity() {
     }
 
     private val currentCategoryNumber: Int by lazy {
-        intent.getIntExtra("currentCategoryNumber", 1)
+        intent.getIntExtra("currentCategoryNumber", 0)
     }
 
     private val stepArray: ArrayList<Steps> by lazy {
@@ -218,7 +223,10 @@ class StepLocationActivity : ComponentActivity() {
     @Composable
     fun UserStayedLocationScreen() {
         val naverMapState = remember { mutableStateOf<NaverMap?>(null) }
+        val coroutineScope = rememberCoroutineScope()
         val naverMap = naverMapState.value
+        val stepIdx = currentCategoryNumber - 1
+        val category = stepArray[stepIdx].stepCategory
 
         NaverMapView { map ->
             naverMapState.value = map
@@ -231,5 +239,31 @@ class StepLocationActivity : ComponentActivity() {
             naverMap?.moveCamera(CameraUpdate.scrollTo(latLng))
         }
 
+        LaunchedEffect(key1 = Unit) {
+            coroutineScope.launch {
+                val placeItems = getCategoryPlace(category)
+
+                Log.i("placeItems = ", placeItems.toString())
+
+                placeItems.items.forEach {
+                    Log.i("item = ", it.toString())
+                }
+            }
+        }
+    }
+
+    private suspend fun getCategoryPlace(category: PlaceCategory): PlaceItemApiOuterResponse {
+        val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
+            cityCode = selectedCityCode,
+            districtCode = selectedDistrictCode,
+            place = category.koreanName,
+            start = 1
+        )
+
+        if (response.isSuccessful) {
+            return response.body() ?: PlaceItemApiOuterResponse()
+        }
+
+        return PlaceItemApiOuterResponse()
     }
 }

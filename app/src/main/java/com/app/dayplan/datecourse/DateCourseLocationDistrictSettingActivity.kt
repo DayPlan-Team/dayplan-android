@@ -1,5 +1,6 @@
 package com.app.dayplan.datecourse
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -125,6 +127,8 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
 
     @Composable
     fun DistrictCategoryScreen(districts: List<Location> = emptyList()) {
+        val currentContext = LocalContext.current
+        val contextState = rememberUpdatedState(currentContext)
         var selectedDistrictCode by remember { mutableStateOf<Long?>(null) }
         var query by remember { mutableStateOf("") } // 검색 쿼리를 저장하기 위한 상태 변수
 
@@ -171,7 +175,9 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
                             .fillMaxWidth()
                             .hoverIndicator()
                             .clickable {
-                                applyStepAction(district)
+                                contextState.value?.let {
+                                    applyStepAction(it, district)
+                                }
                             }
                             .then(backgroundModifier)
                     ) {
@@ -182,15 +188,14 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
             }
         }
     }
-
-    private fun applyStepAction(district: Location) {
-        val context = this@DateCourseLocationDistrictSettingActivity.baseContext
+    private fun applyStepAction(context: Context, district: Location) {
         val intent = Intent(context, StepCategoryActivity::class.java)
         intent.putExtra("districtName", district.name)
         intent.putExtra("districtCode", district.code)
-        intent.putExtra("cityName", intent.getStringExtra("cityName"))
-        intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
-        this@DateCourseLocationDistrictSettingActivity.startActivityAndFinish(StepCategoryActivity::class.java)
+        intent.putExtra("cityName", selectedCityName)
+        intent.putExtra("cityCode", selectedCityCode)
+        context.startActivity(intent)
+        finish()
     }
 
 
