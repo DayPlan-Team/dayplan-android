@@ -1,8 +1,10 @@
 package com.app.dayplan.step
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -20,20 +22,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -204,9 +205,14 @@ class StepCategoryActivity : ComponentActivity() {
     fun DateCourseCategoryBox(
         category: PlaceCategory,
     ) {
+        val currentContext = LocalContext.current
+        val contextState = rememberUpdatedState(currentContext)
+
         Button(
             onClick = {
-                applyStepAction(category)
+                contextState.value?.let {
+                    applyStepAction(it, category)
+                }
             },
             modifier = Modifier
                 .padding(start = 16.dp, bottom = 16.dp)
@@ -240,30 +246,31 @@ class StepCategoryActivity : ComponentActivity() {
         }
     }
 
-    private fun applyStepAction(placeCategory: PlaceCategory) {
-        val context = this@StepCategoryActivity.baseContext
-        val intent = Intent(context, StepCategoryActivity::class.java)
-        intent.putExtra("cityName", intent.getStringExtra("cityName"))
-        intent.putExtra("cityCode", intent.getStringExtra("cityCode"))
-        intent.putExtra("districtName", intent.getStringExtra("districtName"))
-        intent.putExtra("districtCode", intent.getStringExtra("districtCode"))
+    private fun applyStepAction(context: Context, placeCategory: PlaceCategory) {
+        val intent = Intent(context, StepLocationActivity::class.java)
+        intent.putExtra("cityName", selectedCityName)
+        intent.putExtra("cityCode", selectedCityCode)
+        intent.putExtra("districtName", selectedDistrictName)
+        intent.putExtra("districtCode", selectedDistrictCode)
 
-        val nextSteps = ArrayList<Steps>()
+        val locationSteps = ArrayList<Steps>()
         for (idx in 1..currentCategoryNumber) {
             if (idx <= stepArray.lastIndex) {
-                nextSteps.add(stepArray[idx])
+                locationSteps.add(stepArray[idx])
             }
         }
-        val nextCategoryNumber = currentCategoryNumber + 1
-        nextSteps.add(
+        locationSteps.add(
             Steps(
-                stepNumber = nextCategoryNumber,
+                stepNumber = currentCategoryNumber,
                 stepCategory = placeCategory,
             )
         )
-        intent.putExtra("currentCategoryNumber", nextCategoryNumber)
-        intent.putExtra("steps", nextSteps)
+        intent.putExtra("currentCategoryNumber", currentCategoryNumber)
+        intent.putExtra("steps", locationSteps)
 
-        this@StepCategoryActivity.startActivityAndFinish(StepLocationActivity::class.java)
+        Log.i("category steps = ", locationSteps.size.toString())
+
+        context.startActivity(intent)
+        finish()
     }
 }
