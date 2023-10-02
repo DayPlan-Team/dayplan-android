@@ -44,11 +44,15 @@ import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.userlocation.LocationSettingSync
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.Tm128
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
-import kotlinx.coroutines.coroutineScope
+import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.Overlay
 import kotlinx.coroutines.launch
+import java.lang.StringBuilder
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepLocationActivity : ComponentActivity() {
@@ -186,25 +190,6 @@ class StepLocationActivity : ComponentActivity() {
     }
 
     @Composable
-    fun DateCourseCategoryText(text1: String, text2: String) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = text1,
-                style = TextStyle(fontWeight = FontWeight.Bold),
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-            Text(
-                text = text2,
-                style = TextStyle(fontWeight = FontWeight.Normal),
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-        }
-    }
-
-    @Composable
     fun NaverMapView(
         onMapReady: (NaverMap) -> Unit
     ) {
@@ -224,46 +209,73 @@ class StepLocationActivity : ComponentActivity() {
     fun UserStayedLocationScreen() {
         val naverMapState = remember { mutableStateOf<NaverMap?>(null) }
         val coroutineScope = rememberCoroutineScope()
-        val naverMap = naverMapState.value
-        val stepIdx = currentCategoryNumber - 1
-        val category = stepArray[stepIdx].stepCategory
 
         NaverMapView { map ->
             naverMapState.value = map
-        }
+            map.moveCamera(CameraUpdate.zoomTo(12.0))
 
-        LocationSettingSync { latLng ->
-            Log.i("lating = ", latLng.toString())
-            Log.i("navermap is null = ", (naverMap == null).toString())
-
-            naverMap?.moveCamera(CameraUpdate.scrollTo(latLng))
-        }
-
-        LaunchedEffect(key1 = Unit) {
             coroutineScope.launch {
-                val placeItems = getCategoryPlace(category)
+                val stepIdx = currentCategoryNumber - 1
+                val category = stepArray[stepIdx].stepCategory
+                val placeItems = getCategoryPlace(category, 1)
 
                 Log.i("placeItems = ", placeItems.toString())
 
                 placeItems.items.forEach {
                     Log.i("item = ", it.toString())
+
+                    try {
+                        val marker = Marker()
+
+                        val longitude = StringBuilder()
+                            .append(it.mapx.substring(0, 3))
+                            .append(".")
+                            .append(it.mapx.substring(3))
+                            .toString()
+                            .toDouble()
+
+                        val latitude = StringBuilder()
+                            .append(it.mapy.substring(0, 2))
+                            .append(".")
+                            .append(it.mapy.substring(2))
+                            .toString()
+                            .toDouble()
+
+                        val latLng = LatLng(latitude, longitude)
+                        Log.i("latLng = ", latLng.toString())
+                        marker.position = latLng
+                        marker.map = map
+                        marker.onClickListener = Overlay.OnClickListener {
+                            true
+                        }
+
+                    } catch (e: Exception) {
+                        Log.i("error = ", e.toString())
+                    }
                 }
             }
         }
+
+//        LocationSettingSync { latLng ->
+//            Log.i("lating = ", latLng.toString())
+//            Log.i("navermap is null = ", (naverMap == null).toString())
+//
+//            naverMap?.moveCamera(CameraUpdate.scrollTo(latLng))
+//        }
     }
 
-    private suspend fun getCategoryPlace(category: PlaceCategory): PlaceItemApiOuterResponse {
-        val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
-            cityCode = selectedCityCode,
-            districtCode = selectedDistrictCode,
-            place = category.koreanName,
-            start = 1
-        )
-
-        if (response.isSuccessful) {
-            return response.body() ?: PlaceItemApiOuterResponse()
+    private suspend fun getCategoryPlace(category: PlaceCategory, start: Int): PlaceItemApiOuterResponse {
+        for (idx in start..start + 3) {
+            val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
+                cityCode = selectedCityCode,
+                districtCode = selectedDistrictCode,
+                place = category.koreanName,
+                start = idx
+            )
+            if (response.isSuccessful) {
+                return response.body() ?: PlaceItemApiOuterResponse()
+            }
         }
-
         return PlaceItemApiOuterResponse()
     }
 }
