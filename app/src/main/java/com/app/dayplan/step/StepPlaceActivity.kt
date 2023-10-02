@@ -239,7 +239,7 @@ class StepPlaceActivity : ComponentActivity() {
             val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
                 cityCode = selectedCityCode,
                 districtCode = selectedDistrictCode,
-                place = category.koreanName,
+                place = category,
                 start = idx
             )
             if (response.isSuccessful) {
