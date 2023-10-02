@@ -1,5 +1,7 @@
 package com.app.dayplan.step
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -7,16 +9,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -27,35 +31,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.app.dayplan.api.auth.ApiAuthClient
 import com.app.dayplan.datecourse.Location
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.LocationSettingSync
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.geometry.Tm128
-import com.naver.maps.map.CameraUpdate
-import com.naver.maps.map.MapView
-import com.naver.maps.map.NaverMap
-import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.Overlay
-import kotlinx.coroutines.launch
-import java.lang.StringBuilder
+import com.app.dayplan.util.IntentExtra
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-class StepLocationActivity : ComponentActivity() {
+class StepPlaceActivity : ComponentActivity() {
 
     private val selectedCityCode: Long by lazy {
         intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
@@ -78,7 +72,8 @@ class StepLocationActivity : ComponentActivity() {
     }
 
     private val stepArray: ArrayList<Steps> by lazy {
-        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps> ?: arrayListOf()
+        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps>
+            ?: arrayListOf()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,10 +95,9 @@ class StepLocationActivity : ComponentActivity() {
         ) {
             TopBar()
             StepSection()
-            Divider(color = Color.Gray, thickness = 3.dp)
-            DateCourseCategoryThemeBox("원하는 위치를 선택 해주세요")
-            UserStayedLocationScreen()
-            HomeBar(this@StepLocationActivity)
+            Divider(color = Color.Gray, thickness = 3.dp) // 위의 경계선
+            PlaceItemLocationScreen()
+            HomeBar(this@StepPlaceActivity)
         }
     }
 
@@ -179,92 +173,68 @@ class StepLocationActivity : ComponentActivity() {
             }
         }
     }
-    @Composable
-    fun DateCourseCategoryThemeBox(
-        text1: String,
-    ) {
-        Text(
-            text = text1,
-            style = TextStyle(fontWeight = FontWeight.Bold),
-        )
-    }
 
     @Composable
-    fun NaverMapView(
-        onMapReady: (NaverMap) -> Unit
-    ) {
-        AndroidView(
-            factory = { context ->
-                MapView(context).apply {
-                    onCreate(Bundle())
-                    getMapAsync { naverMap -> onMapReady(naverMap) }
-                }
-            },
-            modifier = Modifier
-                .height(300.dp)
-        )
-    }
+    fun PlaceItemLocationScreen() {
+        val placeItemsState = remember { mutableStateOf<List<PlaceItemApiResponse>>(emptyList()) }
+        val currentContext = LocalContext.current
 
-    @Composable
-    fun UserStayedLocationScreen() {
-        val naverMapState = remember { mutableStateOf<NaverMap?>(null) }
-        val coroutineScope = rememberCoroutineScope()
+        LaunchedEffect(key1 = Unit) {
+            val stepIdx = currentCategoryNumber - 1
+            val category = stepArray[stepIdx].stepCategory
+            val placeItems = getCategoryPlace(category, 1)
 
-        NaverMapView { map ->
-            naverMapState.value = map
-            map.moveCamera(CameraUpdate.zoomTo(12.0))
+            placeItemsState.value = placeItems.items
+        }
 
-            coroutineScope.launch {
-                val stepIdx = currentCategoryNumber - 1
-                val category = stepArray[stepIdx].stepCategory
-                val placeItems = getCategoryPlace(category, 1)
-
-                Log.i("placeItems = ", placeItems.toString())
-
-                placeItems.items.forEach {
-                    Log.i("item = ", it.toString())
-
-                    try {
-                        val marker = Marker()
-
-                        val longitude = StringBuilder()
-                            .append(it.mapx.substring(0, 3))
-                            .append(".")
-                            .append(it.mapx.substring(3))
-                            .toString()
-                            .toDouble()
-
-                        val latitude = StringBuilder()
-                            .append(it.mapy.substring(0, 2))
-                            .append(".")
-                            .append(it.mapy.substring(2))
-                            .toString()
-                            .toDouble()
-
-                        val latLng = LatLng(latitude, longitude)
-                        Log.i("latLng = ", latLng.toString())
-                        marker.position = latLng
-                        marker.map = map
-                        marker.onClickListener = Overlay.OnClickListener {
-                            true
-                        }
-
-                    } catch (e: Exception) {
-                        Log.i("error = ", e.toString())
-                    }
+        LazyColumn {
+            items(placeItemsState.value) { item ->
+                // 여기에서 각 항목에 대한 UI를 생성합니다.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { applyStepAction(currentContext, item) }
+                ) {
+                    PlaceBox(item)
                 }
             }
         }
-
-//        LocationSettingSync { latLng ->
-//            Log.i("lating = ", latLng.toString())
-//            Log.i("navermap is null = ", (naverMap == null).toString())
-//
-//            naverMap?.moveCamera(CameraUpdate.scrollTo(latLng))
-//        }
     }
 
-    private suspend fun getCategoryPlace(category: PlaceCategory, start: Int): PlaceItemApiOuterResponse {
+    @Composable
+    fun PlaceBox(item: PlaceItemApiResponse) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = item.title,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = item.roadAddress,
+                        color = Color.Gray
+                    )
+                    if(item.telephone.isNotEmpty()) {
+                        Text(
+                            text = item.telephone,
+                            color = Color.Blue
+                        )
+                    }
+                }
+            }
+            Divider(color = Color.Gray, thickness = 1.dp) // 아래의 경계선
+        }
+    }
+    
+    private suspend fun getCategoryPlace(
+        category: PlaceCategory,
+        start: Int
+    ): PlaceItemApiOuterResponse {
         for (idx in start..start + 3) {
             val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
                 cityCode = selectedCityCode,
@@ -277,5 +247,18 @@ class StepLocationActivity : ComponentActivity() {
             }
         }
         return PlaceItemApiOuterResponse()
+    }
+
+    private fun applyStepAction(context: Context, placeItemApiResponse: PlaceItemApiResponse) {
+        val intent = Intent(context, StepMapActivity::class.java)
+        intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
+        intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
+        intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
+        intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
+        intent.putExtra(IntentExtra.CURRENT_CATEGORY_NUMBER.key, currentCategoryNumber)
+        intent.putExtra(IntentExtra.STEPS.key, stepArray)
+        intent.putExtra(IntentExtra.SELECTED_PLACE_ITEM.key, placeItemApiResponse)
+        context.startActivity(intent)
+        finish()
     }
 }

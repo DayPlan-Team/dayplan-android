@@ -1,5 +1,7 @@
 package com.app.dayplan.step
 
+import java.io.Serializable
+
 data class PlaceItemApiOuterResponse(
     val total: Int = 0,
     val start: Int = 1,
@@ -17,4 +19,4 @@ data class PlaceItemApiResponse(
     val roadAddress: String = "",
     val mapx: String = "",
     val mapy: String = "",
-)
+) : Serializable
