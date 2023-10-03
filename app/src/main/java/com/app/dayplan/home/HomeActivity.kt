@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,11 +19,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +37,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.TestModifierUpdaterLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,10 +54,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import coil.compose.rememberImagePainter
 import com.app.dayplan.R
 import com.app.dayplan.advertise.ViewPagerAdapter
 import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
 import com.app.dayplan.map.MapRegistrationActivity
+import com.app.dayplan.step.PlaceCategory
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.startActivityAndFinish
 import kotlinx.coroutines.Dispatchers
@@ -69,19 +81,33 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     fun HomeScreen() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TopBar()
-            AdvertisementSlider()
-            DateCourseSection()
-            CategorySection()
-            Divider(color = Color.Gray, thickness = 1.dp)
-            WhereGoSection()
-            LocationRegistrationSection()
-            HomeBar(this@HomeActivity)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) { // 전체 화면을 차지하는 Box
+            TopBar2(modifier = Modifier.align(Alignment.TopCenter))
+            // 스크롤 가능한 영역
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        top = 80.dp,
+                        bottom = 60.dp
+                    )
+            ) {
+                item { AdvertisementSlider() }
+                item { DateCourseSection() }
+                item { WhereGoSection() }
+                item { Divider(color = Color(0xFFEBEBEB), thickness = 3.dp) }
+                item { WhereNotGoSection() }
+                item { Divider(color = Color(0xFFEBEBEB), thickness = 3.dp) }
+//                item { LocationRegistrationSection() }
+                item { RealReviewScreen() }
+            }
+
+            // 화면 하단에 위치하는 홈바
+            HomeBar2(this@HomeActivity, modifier = Modifier.align(Alignment.BottomCenter))
         }
     }
 
@@ -107,7 +133,11 @@ class HomeActivity : ComponentActivity() {
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp),
+                .height(200.dp)
+                .padding(
+                    top = 10.dp,
+                    bottom = 20.dp
+                ),
             factory = { context ->
                 viewPager.apply {
                     this.adapter = adapter
@@ -147,7 +177,12 @@ class HomeActivity : ComponentActivity() {
     fun DateCourseSection() {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 20.dp,
+                ),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -182,7 +217,7 @@ class HomeActivity : ComponentActivity() {
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .height(70.dp)
-                .width(180.dp)
+                .width(150.dp)
                 .background(Color(0xFFF1F1F1), shape = RoundedCornerShape(20.dp)),
             contentPadding = PaddingValues(16.dp),
             colors = ButtonDefaults.buttonColors(
@@ -221,48 +256,6 @@ class HomeActivity : ComponentActivity() {
         Text(text = styledText)
     }
 
-    // 세 번째 섹션: 카테고리 박스 4개
-    @Composable
-    fun CategorySection() {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp)
-            ) {
-                CategoryBox("")
-                CategoryBox("")
-                CategoryBox("")
-                CategoryBox("")
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp)
-            ) {
-                CategoryBox("")
-                CategoryBox("")
-                CategoryBox("")
-                CategoryBox("")
-            }
-        }
-    }
-
-    @Composable
-    fun CategoryBox(categoryName: String) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(Color.LightGray)
-        ) {
-            Text(categoryName, modifier = Modifier.align(Alignment.Center))
-        }
-    }
-
     @Composable
     fun WhereGoSection() {
         Column(
@@ -274,7 +267,7 @@ class HomeActivity : ComponentActivity() {
                     modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
                 ) {
                     Text(
-                        text = "어디로 가시나요?",
+                        text = "어떤 활동을 하시나요?",
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.sp * 1.5f,
                     )
@@ -284,10 +277,21 @@ class HomeActivity : ComponentActivity() {
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    WhereGoBox("") // CategoryBox에도 동일한 패딩을 적용해야합니다.
-                    WhereGoBox("")
-                    WhereGoBox("")
-                    WhereGoBox("")
+                    WhereGoBox(PlaceCategory.CAFE) // CategoryBox에도 동일한 패딩을 적용해야합니다.
+                    WhereGoBox(PlaceCategory.ACTIVITY)
+                    WhereGoBox(PlaceCategory.PARK)
+                    WhereGoBox(PlaceCategory.RESTAURANT)
+                    WhereGoBox(PlaceCategory.ZOO)
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    WhereGoBox(PlaceCategory.AQUARIUM) // CategoryBox에도 동일한 패딩을 적용해야합니다.
+                    WhereGoBox(PlaceCategory.CONCERT_HALL)
+                    WhereGoBox(PlaceCategory.FITNESS)
+                    WhereGoBox(PlaceCategory.LIBRARY)
+                    WhereGoBox(PlaceCategory.SHOPPING_MALL)
                 }
             }
 
@@ -296,14 +300,96 @@ class HomeActivity : ComponentActivity() {
     }
 
     @Composable
-    fun WhereGoBox(categoryName: String) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color.LightGray)
+    fun WhereNotGoSection() {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(categoryName, modifier = Modifier.align(Alignment.Center))
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween // 요소들을 양쪽 끝으로 분리
+                ) {
+                    Text(
+                        text = "아직 안 가본 곳",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp * 1.5f,
+                    )
+                    Text( // 오른쪽에 위치하는 "전체보기>" 텍스트
+                        text = "전체보기 >",
+                        color = Color.Gray, // 원하는 색상 설정
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
+                Row(
+                    modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "다른 동네들도 채워보세요",
+                        color = Color(0xFF7B7B7B),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                    )
+                }
+                Spacer(modifier = Modifier.width(15.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    WhereNotGoBox("내 주변") // CategoryBox에도 동일한 패딩을 적용해야합니다.
+                    WhereNotGoBox("강동구")
+                    WhereNotGoBox("강서구")
+                    WhereNotGoBox("중랑구")
+                    WhereNotGoBox("종로구")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+
+    @Composable
+    fun WhereNotGoBox(text: String) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(start = 6.dp, bottom = 6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            ) // 이것은 동그란 박스입니다.
+            Text(
+                text = text,
+                fontSize = 10.sp
+            ) // 이 텍스트는 박스 위에 나타납니다.
+        }
+    }
+
+    @Composable
+    fun WhereGoBox(placeCategory: PlaceCategory) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(start = 6.dp, bottom = 6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            ) // 이것은 동그란 박스입니다.
+            Text(
+                text = placeCategory.koreanName,
+                fontSize = 10.sp
+            ) // 이 텍스트는 박스 위에 나타납니다.
         }
     }
 
@@ -338,14 +424,85 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun RealReviewScreen() {
+        // 임의의 데이터 (이 부분은 실제 데이터로 변경하셔야 합니다.)
+        val reviews = listOf(
+            Review(name = "스타벅스", description = "카공 맛집!", ""),
+            Review(name = "이디야", description = "커피 맛집!", ""),
+            Review(name = "집부실", description = "공부 맛집!", ""),
+        )
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                modifier = Modifier.padding(bottom = 5.dp),
+                text = "직접 방문한 유저들의 리얼 리뷰",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF7B7B7B),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))  // 공간 확보
+
+            LazyRow {
+                items(reviews) { review ->
+                    ReviewBox(review)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ReviewBox(review: Review) {
+        Column(
+            modifier = Modifier.padding(end = 16.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                shadowElevation = 4.dp,
+                modifier = Modifier
+                    .width(200.dp)
+                    .shadow(8.dp, RoundedCornerShape(8.dp))
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = R.drawable.ad1),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .height(150.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = review.name,
+                fontSize = 13.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = review.description,
+                fontSize = 10.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+
+    data class Review(
+        val name: String,
+        val description: String,
+        val imageUrl: String,
+    )
 
     @Preview(showBackground = true)
     @Composable
-    fun PreviewHomeScreen() {
-        DayplanTheme {
-            HomeScreen()
-        }
+    fun PreviewRealReviewScreen() {
+        RealReviewScreen()
     }
+
 
     fun Int.dpToPx(dp: Float): Int {
         val density = resources.displayMetrics.density
