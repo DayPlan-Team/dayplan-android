@@ -26,6 +26,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -96,7 +99,8 @@ class StepPlaceActivity : ComponentActivity() {
             TopBar()
             StepSection()
             Divider(color = Color.Gray, thickness = 3.dp) // 위의 경계선
-            PlaceItemLocationScreen()
+//            PlaceItemLocationScreen()
+            PlaceItemLocationScreen2()
             HomeBar(this@StepPlaceActivity)
         }
     }
@@ -230,7 +234,71 @@ class StepPlaceActivity : ComponentActivity() {
             Divider(color = Color.Gray, thickness = 1.dp) // 아래의 경계선
         }
     }
-    
+
+
+    @Composable
+    fun PlaceItemLocationScreen2() {
+        val placeItemsState = remember { mutableStateOf<List<PlaceItemApiResponse>>(emptyList()) }
+        val currentContext = LocalContext.current
+        val selectedTabIndex = remember { mutableStateOf(0) } // 현재 선택된 탭의 인덱스를 저장하는 state
+        val tabTitles = listOf("통합", "추천", "저장")
+
+        // 데이터 로드
+        LaunchedEffect(key1 = Unit) {
+            val stepIdx = currentCategoryNumber - 1
+            val category = stepArray[stepIdx].stepCategory
+            val placeItems = getCategoryPlace(category, 1)
+
+            placeItemsState.value = placeItems.items
+        }
+
+        // 탭 레이아웃 생성
+        Column {
+            TabRow(
+                selectedTabIndex = selectedTabIndex.value,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedTabIndex.value == index,
+                        onClick = {
+                            selectedTabIndex.value = index
+                        }
+                    )
+                }
+            }
+
+            // 탭에 따라 다른 내용 표시
+            when (selectedTabIndex.value) {
+                0 -> {
+                    // "통합" 탭의 내용
+                    LazyColumn {
+                        items(placeItemsState.value) { item ->
+                            // 여기에서 각 항목에 대한 UI를 생성합니다.
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { applyStepAction(currentContext, item) }
+                            ) {
+                                PlaceBox(item)
+                            }
+                        }
+                    }
+                }
+                1 -> {
+                    // "추천" 탭의 내용
+                    // 추천 관련 내용을 여기에 추가하세요.
+                }
+                2 -> {
+                    // "저장" 탭의 내용
+                    // 저장 관련 내용을 여기에 추가하세요.
+                }
+            }
+        }
+    }
+
+
     private suspend fun getCategoryPlace(
         category: PlaceCategory,
         start: Int
