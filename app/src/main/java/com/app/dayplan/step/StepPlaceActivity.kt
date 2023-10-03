@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
@@ -100,7 +101,8 @@ class StepPlaceActivity : ComponentActivity() {
             StepSection()
             Divider(color = Color.Gray, thickness = 3.dp) // 위의 경계선
 //            PlaceItemLocationScreen()
-            PlaceItemLocationScreen2()
+//            PlaceItemLocationScreen2()
+            PlaceItemLocationScreen3()
             HomeBar(this@StepPlaceActivity)
         }
     }
@@ -297,6 +299,97 @@ class StepPlaceActivity : ComponentActivity() {
             }
         }
     }
+
+
+    @Composable
+    fun PlaceItemLocationScreen3() {
+        val placeItemsState = remember { mutableStateOf<List<PlaceItemApiResponse>>(emptyList()) }
+        val currentContext = LocalContext.current
+        val selectedTabIndex = remember { mutableStateOf(0) } // 현재 선택된 탭의 인덱스를 저장하는 state
+        val selectedTagIndex = remember { mutableStateOf(0) } // 현재 선택된 태그의 인덱스를 저장하는 state
+        val tabTitles = listOf("통합", "추천", "저장")
+        val tagTitles = listOf("좋아요순", "최신순", "스크랩순")
+
+        // 데이터 로드
+        LaunchedEffect(key1 = Unit) {
+            val stepIdx = currentCategoryNumber - 1
+            val category = stepArray[stepIdx].stepCategory
+            val placeItems = getCategoryPlace(category, 1)
+
+            placeItemsState.value = placeItems.items
+        }
+
+        // 탭 레이아웃 생성
+        Column {
+            TabRow(
+                selectedTabIndex = selectedTabIndex.value,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        text = { Text(title) },
+                        selected = selectedTabIndex.value == index,
+                        onClick = {
+                            selectedTabIndex.value = index
+                        }
+                    )
+                }
+            }
+
+            // 태그 레이아웃
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                tagTitles.forEachIndexed { index, title ->
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .clickable {
+                                selectedTagIndex.value = index
+                            }
+                            .background(
+                                if (selectedTagIndex.value == index) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                            .padding(8.dp),
+                        color = if (selectedTagIndex.value == index) MaterialTheme.colorScheme.primary else Color.Gray
+                    )
+                }
+            }
+
+            // 탭 및 태그에 따라 다른 내용 표시
+            when (selectedTabIndex.value) {
+                0 -> {
+                    // "통합" 탭의 내용
+                    // 태그에 따라 데이터를 필터링하거나 정렬하는 코드를 추가할 수 있습니다.
+                    LazyColumn {
+                        items(placeItemsState.value) { item ->
+                            // 여기에서 각 항목에 대한 UI를 생성합니다.
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { applyStepAction(currentContext, item) }
+                            ) {
+                                PlaceBox(item)
+                            }
+                        }
+                    }
+                }
+                1 -> {
+                    // "추천" 탭의 내용
+                    // 추천 관련 내용을 여기에 추가하세요.
+                }
+                2 -> {
+                    // "저장" 탭의 내용
+                    // 저장 관련 내용을 여기에 추가하세요.
+                }
+            }
+        }
+    }
+
 
 
     private suspend fun getCategoryPlace(
