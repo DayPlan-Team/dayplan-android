@@ -9,10 +9,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,7 +71,8 @@ class StepCategoryActivity : ComponentActivity() {
     }
 
     private val stepArray: ArrayList<Steps> by lazy {
-        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps> ?: arrayListOf()
+        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps>
+            ?: arrayListOf()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,14 +107,12 @@ class StepCategoryActivity : ComponentActivity() {
     ) {
         Text(
             text = text1,
-            style = TextStyle(fontWeight = FontWeight.Bold),
+            fontSize = 20.sp,
         )
     }
 
-
     @Composable
     fun StepSection() {
-
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceEvenly
@@ -120,73 +121,32 @@ class StepCategoryActivity : ComponentActivity() {
                 text = "데이트 코스 선택",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp),
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
+                    .padding(start = 16.dp, bottom = 10.dp),
+                fontSize = 25.sp
             )
 
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp)
+                    .padding(bottom = 16.dp)
             ) {
-                for (idx in 1..currentCategoryNumber) {
+                for (idx in 0 until currentCategoryNumber) {
                     if (idx <= stepArray.lastIndex) {
-                        WhereAlreadySetGoBox("step${idx}")
+                        val step = stepArray[idx]
+                        StepInfo(
+                            stepNumber = "step${step.stepNumber}",
+                            category = step.stepCategory.koreanName, // Assuming `PlaceCategory` has a `name` property
+                            placeName = step.placeName,
+                            stage = step.stage,
+                        )
                     } else {
-                        WhereGoBox("step${idx}")
+                        StepInfo("step${idx + 1}", "", "", StepStage.START)
                     }
                 }
             }
         }
     }
-
-    @Composable
-    fun WhereGoBox(text: String) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(start = 6.dp, bottom = 6.dp)
-        ) {
-            Text(text = text) // 이 텍스트는 박스 위에 나타납니다.
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray)
-            ) // 이것은 동그란 박스입니다.
-        }
-    }
-
-    @Composable
-    fun WhereAlreadySetGoBox(text: String) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(start = 6.dp, bottom = 6.dp)
-        ) {
-            Text(text = text) // 이 텍스트는 박스 위에 나타납니다.
-            Box(
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center  // 여기에 이 코드를 추가합니다.
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Done,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-        }
-    }
-
     @Composable
     fun CategorySection() {
         Column(
@@ -235,12 +195,10 @@ class StepCategoryActivity : ComponentActivity() {
         ) {
             Text(
                 text = text1,
-                style = TextStyle(fontWeight = FontWeight.Bold),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Text(
                 text = text2,
-                style = TextStyle(fontWeight = FontWeight.Normal),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
@@ -254,7 +212,7 @@ class StepCategoryActivity : ComponentActivity() {
         intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
 
         val locationSteps = ArrayList<Steps>()
-        for (idx in 1..currentCategoryNumber) {
+        for (idx in 0 until currentCategoryNumber) {
             if (idx <= stepArray.lastIndex) {
                 locationSteps.add(stepArray[idx])
             }
@@ -263,12 +221,12 @@ class StepCategoryActivity : ComponentActivity() {
             Steps(
                 stepNumber = currentCategoryNumber,
                 stepCategory = placeCategory,
+                stage = StepStage.CATEGORY_FINISH,
             )
         )
 
         intent.putExtra(IntentExtra.CURRENT_CATEGORY_NUMBER.key, currentCategoryNumber)
         intent.putExtra(IntentExtra.STEPS.key, locationSteps)
-        Log.i("category steps = ", locationSteps.size.toString())
 
         context.startActivity(intent)
         finish()

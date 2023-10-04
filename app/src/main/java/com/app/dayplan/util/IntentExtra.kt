@@ -10,4 +10,5 @@ enum class IntentExtra(
     CURRENT_CATEGORY_NUMBER("currentCategoryNumber"),
     STEPS("steps"),
     SELECTED_PLACE_ITEM("selectedPlaceItem"),
+    COURSE_GROUP_Id("courseGroupId"),
 }

@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<UpdateLocationWorker>(1, TimeUnit.MINUTES)
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<UpdateLocationWorker>(10, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(this).enqueue(periodicWorkRequest)

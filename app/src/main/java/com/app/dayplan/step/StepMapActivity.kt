@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,25 +26,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.app.dayplan.api.auth.ApiAuthClient.courseService
 import com.app.dayplan.datecourse.Location
+import com.app.dayplan.home.HomeActivity
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
-import com.app.dayplan.map.MapRegistrationActivity
 import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.userlocation.Coordinates
 import com.app.dayplan.util.IntentExtra
-import com.app.dayplan.util.startActivityAndFinish
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepMapActivity : ComponentActivity() {
@@ -77,6 +82,10 @@ class StepMapActivity : ComponentActivity() {
     private val selectedPlaceItem: PlaceItemApiResponse by lazy {
         intent.getSerializableExtra("selectedPlaceItem", PlaceItemApiResponse::class.java)
             ?: PlaceItemApiResponse()
+    }
+
+    private val selectedCourseGroupId: Long by lazy {
+        intent.getLongExtra(IntentExtra.COURSE_GROUP_Id.key, 0L)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,21 +130,7 @@ class StepMapActivity : ComponentActivity() {
         NaverMapView { map ->
             naverMapState.value = map
 
-            val latitude = StringBuilder()
-                .append(selectedPlaceItem.mapy.substring(0, 2))
-                .append(".")
-                .append(selectedPlaceItem.mapy.substring(2))
-                .toString()
-                .toDouble()
-
-            val longitude = StringBuilder()
-                .append(selectedPlaceItem.mapx.substring(0, 3))
-                .append(".")
-                .append(selectedPlaceItem.mapx.substring(3))
-                .toString()
-                .toDouble()
-
-            val latLng = LatLng(latitude, longitude)
+            val latLng = LatLng(selectedPlaceItem.latitude, selectedPlaceItem.longitude)
             map.moveCamera(CameraUpdate.scrollTo(latLng))
             map.moveCamera(CameraUpdate.zoomTo(16.0))
 
@@ -167,6 +162,9 @@ class StepMapActivity : ComponentActivity() {
 
     @Composable
     fun PlaceBox() {
+        val coroutineScope = rememberCoroutineScope()
+        val currentContext = LocalContext.current
+
         Column {
             Divider(color = Color.Gray, thickness = 1.dp) // 아래의 경계선
             Box(
@@ -203,7 +201,9 @@ class StepMapActivity : ComponentActivity() {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = { },
+                    onClick = {
+                        coroutineScope.launch { setCourse(currentContext) }
+                    },
                     modifier = Modifier
                         .padding(16.dp)
                         .background(Color(0xFFF1F1F1), shape = RoundedCornerShape(20.dp)),
@@ -219,28 +219,73 @@ class StepMapActivity : ComponentActivity() {
         }
     }
 
-    private fun applyStepAction(context: Context, placeItemApiResponse: PlaceItemApiResponse) {
-        val intent = Intent(context, StepMapActivity::class.java)
+    private suspend fun setCourse(context: Context) {
 
-        val nextCurrentCategoryNumber = currentCategoryNumber + 1
-        val nextSteps = arrayListOf<Steps>()
+        val courseSettingApiRequest = CourseSettingApiRequest(
+            groupId = selectedCourseGroupId,
+            step = stepArray.size,
+            placeId = selectedPlaceItem.placeId,
+            location = Coordinates(
+                latitude = selectedPlaceItem.latitude,
+                longitude = selectedPlaceItem.longitude,
+            ),
+        )
 
-        stepArray.forEach {
-            nextSteps.add(it)
+        try {
+            val response = courseService.setCourseAndGetCourseGroupId(courseSettingApiRequest)
+
+            if (response.isSuccessful) {
+                val responseBody = response.body()
+                Log.i("responseBody = ", responseBody.toString())
+
+                if (responseBody != null) {
+
+                    Log.i("responseBody = ", responseBody.toString())
+
+                    val intent = Intent(context, StepCategoryActivity::class.java)
+
+                    val courseGroupId = responseBody.courseGroupId
+                    val nextCurrentCategoryNumber = currentCategoryNumber + 1
+                    Log.i("stepArray = ", "${stepArray.toString()}, ${stepArray.size}")
+
+                    val newStepArray = arrayListOf<Steps>()
+
+                    stepArray.forEachIndexed { index, steps ->
+                        if (index == currentCategoryNumber - 1) {
+                            newStepArray.add(
+                                Steps(
+                                    stepNumber = steps.stepNumber,
+                                    stepCategory = steps.stepCategory,
+                                    placeName = selectedPlaceItem.title,
+                                    stage = StepStage.MAP_FINISH,
+                                )
+                            )
+                        } else {
+                            newStepArray.add(steps)
+                        }
+                    }
+
+                    intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
+                    intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
+                    intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
+                    intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
+                    intent.putExtra(
+                        IntentExtra.CURRENT_CATEGORY_NUMBER.key,
+                        nextCurrentCategoryNumber
+                    )
+                    intent.putExtra(IntentExtra.STEPS.key, newStepArray)
+                    intent.putExtra(IntentExtra.COURSE_GROUP_Id.key, courseGroupId)
+
+                    context.startActivity(intent)
+                    finish()
+
+                } else throw Exception()
+            } else throw Exception()
+        } catch (e: Exception) {
+            Log.i("error  = ", e.toString())
+            val intent = Intent(context, HomeActivity::class.java)
+            context.startActivity(intent)
+            finish()
         }
-
-        TODO()
-
-
-        intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
-        intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
-        intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
-        intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
-        intent.putExtra(IntentExtra.CURRENT_CATEGORY_NUMBER.key, currentCategoryNumber)
-        intent.putExtra(IntentExtra.STEPS.key, stepArray)
-        intent.putExtra(IntentExtra.SELECTED_PLACE_ITEM.key, placeItemApiResponse)
-        context.startActivity(intent)
-        finish()
     }
-
 }
