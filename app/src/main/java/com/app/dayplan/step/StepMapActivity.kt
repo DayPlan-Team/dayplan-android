@@ -24,9 +24,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,13 +37,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.app.dayplan.api.auth.ApiAuthClient.courseService
-import com.app.dayplan.datecourse.Location
+import com.app.dayplan.api.auth.ApiAuthClient
+import com.app.dayplan.course.Course
+import com.app.dayplan.course.CourseView
+import com.app.dayplan.coursegroup.CourseGroup
 import com.app.dayplan.home.HomeActivity
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
-import com.app.dayplan.userlocation.Coordinates
 import com.app.dayplan.util.IntentExtra
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
@@ -49,43 +53,21 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepMapActivity : ComponentActivity() {
 
-    private val selectedCityCode: Long by lazy {
-        intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
+    private val courseGroup: CourseGroup by lazy {
+        intent.getSerializableExtra(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)!!
     }
 
-    private val selectedCityName: String by lazy {
-        intent.getStringExtra("cityName") ?: Location.DEFAULT_CITY_NAME
-    }
-
-    private val selectedDistrictCode: Long by lazy {
-        intent.getLongExtra("districtCode", Location.DEFAULT_DISTRICT_CODE)
-    }
-
-    private val selectedDistrictName: String by lazy {
-        intent.getStringExtra("districtName") ?: Location.DEFAULT_DISTRICT_NAME
-    }
-
-    private val currentCategoryNumber: Int by lazy {
-        intent.getIntExtra("currentCategoryNumber", 0)
-    }
-
-    private val stepArray: ArrayList<Steps> by lazy {
-        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps>
-            ?: arrayListOf()
+    private val currentCategoryIndex: Int by lazy {
+        intent.getIntExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, 0)
     }
 
     private val selectedPlaceItem: PlaceItemApiResponse by lazy {
-        intent.getSerializableExtra("selectedPlaceItem", PlaceItemApiResponse::class.java)
+        intent.getSerializableExtra(IntentExtra.SELECTED_PLACE_ITEM.key, PlaceItemApiResponse::class.java)
             ?: PlaceItemApiResponse()
-    }
-
-    private val selectedCourseGroupId: Long by lazy {
-        intent.getLongExtra(IntentExtra.COURSE_GROUP_Id.key, 0L)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,6 +82,13 @@ class StepMapActivity : ComponentActivity() {
 
     @Composable
     fun StepScreen() {
+
+        var courseViews by remember { mutableStateOf<List<CourseView>>(emptyList()) }
+
+        LaunchedEffect(Unit) {
+            courseViews = getCourses()
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -107,11 +96,24 @@ class StepMapActivity : ComponentActivity() {
         ) {
             TopBar()
             StepSection()
-            PlaceBox()
+            PlaceBox(courseViews)
             HomeBar(this@StepMapActivity)
         }
     }
 
+    private suspend fun getCourses(): List<CourseView> {
+        try {
+            val response = ApiAuthClient.courseService.getCourses(courseGroup.groupId)
+
+            if (response.isSuccessful && response.body() != null) {
+                return response.body()!!.courses
+            }
+
+        } catch (e: Exception) {
+        }
+
+        return emptyList()
+    }
 
     @Composable
     fun StepSection() {
@@ -161,9 +163,17 @@ class StepMapActivity : ComponentActivity() {
     }
 
     @Composable
-    fun PlaceBox() {
+    fun PlaceBox(courseView: List<CourseView>) {
         val coroutineScope = rememberCoroutineScope()
         val currentContext = LocalContext.current
+
+        var isButtonEnabled = courseView.isNotEmpty()
+
+        LaunchedEffect(courseView) {
+            if (courseView.isNotEmpty()) {
+                isButtonEnabled = true
+            }
+        }
 
         Column {
             Divider(color = Color.Gray, thickness = 1.dp) // 아래의 경계선
@@ -202,7 +212,9 @@ class StepMapActivity : ComponentActivity() {
             ) {
                 Button(
                     onClick = {
-                        coroutineScope.launch { setCourse(currentContext) }
+                        if (isButtonEnabled) {
+                            coroutineScope.launch { setCourse(currentContext, courseView) }
+                        }
                     },
                     modifier = Modifier
                         .padding(16.dp)
@@ -219,20 +231,21 @@ class StepMapActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun setCourse(context: Context) {
+    private suspend fun setCourse(context: Context, courseViews: List<CourseView>) {
+        Log.i("currentCategoryIndex = ", "$currentCategoryIndex")
+        Log.i("courseViews = ", "$courseViews")
+        Log.i("courseID = ", "${courseViews[currentCategoryIndex].courseId}")
 
-        val courseSettingApiRequest = CourseSettingApiRequest(
-            groupId = selectedCourseGroupId,
-            step = stepArray.size,
+        val course = Course(
+            groupId = courseGroup.groupId,
+            step = currentCategoryIndex + 1,
             placeId = selectedPlaceItem.placeId,
-            location = Coordinates(
-                latitude = selectedPlaceItem.latitude,
-                longitude = selectedPlaceItem.longitude,
-            ),
+            placeCategory = courseViews[currentCategoryIndex].placeCategory,
+            courseId = courseViews[currentCategoryIndex].courseId,
         )
 
         try {
-            val response = courseService.setCourseAndGetCourseGroupId(courseSettingApiRequest)
+            val response = ApiAuthClient.courseService.upsertCourse(course)
 
             if (response.isSuccessful) {
                 val responseBody = response.body()
@@ -243,39 +256,8 @@ class StepMapActivity : ComponentActivity() {
                     Log.i("responseBody = ", responseBody.toString())
 
                     val intent = Intent(context, StepCategoryActivity::class.java)
-
-                    val courseGroupId = responseBody.courseGroupId
-                    val nextCurrentCategoryNumber = currentCategoryNumber + 1
-                    Log.i("stepArray = ", "${stepArray.toString()}, ${stepArray.size}")
-
-                    val newStepArray = arrayListOf<Steps>()
-
-                    stepArray.forEachIndexed { index, steps ->
-                        if (index == currentCategoryNumber - 1) {
-                            newStepArray.add(
-                                Steps(
-                                    stepNumber = steps.stepNumber,
-                                    stepCategory = steps.stepCategory,
-                                    placeName = selectedPlaceItem.title,
-                                    stage = StepStage.MAP_FINISH,
-                                )
-                            )
-                        } else {
-                            newStepArray.add(steps)
-                        }
-                    }
-
-                    intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
-                    intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
-                    intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
-                    intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
-                    intent.putExtra(
-                        IntentExtra.CURRENT_CATEGORY_NUMBER.key,
-                        nextCurrentCategoryNumber
-                    )
-                    intent.putExtra(IntentExtra.STEPS.key, newStepArray)
-                    intent.putExtra(IntentExtra.COURSE_GROUP_Id.key, courseGroupId)
-
+                    intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
+                    intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, currentCategoryIndex)
                     context.startActivity(intent)
                     finish()
 

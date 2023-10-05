@@ -4,33 +4,24 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -38,20 +29,19 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.dayplan.api.auth.ApiAuthClient
-import com.app.dayplan.datecourse.Location
+import com.app.dayplan.course.CourseView
+import com.app.dayplan.coursegroup.CourseGroup
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
@@ -60,29 +50,12 @@ import com.app.dayplan.util.IntentExtra
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepPlaceActivity : ComponentActivity() {
 
-    private val selectedCityCode: Long by lazy {
-        intent.getLongExtra("cityCode", Location.DEFAULT_CITY_CODE)
+    private val courseGroup: CourseGroup by lazy {
+        intent.getSerializableExtra(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)!!
     }
 
-    private val selectedCityName: String by lazy {
-        intent.getStringExtra("cityName") ?: Location.DEFAULT_CITY_NAME
-    }
-
-    private val selectedDistrictCode: Long by lazy {
-        intent.getLongExtra("districtCode", Location.DEFAULT_DISTRICT_CODE)
-    }
-
-    private val selectedDistrictName: String by lazy {
-        intent.getStringExtra("districtName") ?: Location.DEFAULT_DISTRICT_NAME
-    }
-
-    private val currentCategoryNumber: Int by lazy {
-        intent.getIntExtra("currentCategoryNumber", 0)
-    }
-
-    private val stepArray: ArrayList<Steps> by lazy {
-        intent.getSerializableExtra("steps", ArrayList::class.java) as? ArrayList<Steps>
-            ?: arrayListOf()
+    private val currentCategoryIndex: Int by lazy {
+        intent.getIntExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, 0)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,51 +70,74 @@ class StepPlaceActivity : ComponentActivity() {
 
     @Composable
     fun StepScreen() {
+
+        var courseViews by remember { mutableStateOf<List<CourseView>>(emptyList()) }
+
+        LaunchedEffect(Unit) {
+            courseViews = getCourses()
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopBar()
-            StepSection()
+            StepSection(courseViews)
             Divider(color = Color(0xFFEBEBEB), thickness = 4.dp) // 위의 경계선
-            PlaceItemLocationScreen3()
+            PlaceItemLocationScreen(courseViews)
             HomeBar(this@StepPlaceActivity)
         }
     }
 
+    private suspend fun getCourses(): List<CourseView> {
+        try {
+            val response = ApiAuthClient.courseService.getCourses(courseGroup.groupId)
+
+            if (response.isSuccessful && response.body() != null) {
+                return response.body()!!.courses
+            }
+
+        } catch (e: Exception) {
+        }
+
+        return emptyList()
+    }
+
     @Composable
-    fun StepSection() {
+    fun StepSection(courseViews: List<CourseView>) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(
-                text = "데이트 코스 선택",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 10.dp),
-                fontSize = 25.sp
-            )
-
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             ) {
-                for (idx in 0 until currentCategoryNumber) {
-                    if (idx <= stepArray.lastIndex) {
-                        val step = stepArray[idx]
-                        StepInfo(
-                            stepNumber = "step${step.stepNumber}",
-                            category = step.stepCategory.koreanName, // Assuming `PlaceCategory` has a `name` property
-                            placeName = step.placeName,
-                            stage = step.stage,
-                        )
-                    } else {
-                        StepInfo("step${idx + 1}", "", "", StepStage.START)
-                    }
+                Text(
+                    text = "데이트 코스 선택",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, bottom = 10.dp),
+                    fontSize = 25.sp
+                )
+            }
+
+            LazyRow(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                items(courseViews.size) { course ->
+                    StepInfo(
+                        stepNumber = "step${courseViews[course].step}",
+                        category = courseViews[course].placeCategory.koreanName,
+                        placeName = courseViews[course].placeName,
+                        stage = courseViews[course].courseStage,
+                    )
                 }
             }
         }
@@ -178,7 +174,7 @@ class StepPlaceActivity : ComponentActivity() {
     }
 
     @Composable
-    fun PlaceItemLocationScreen3() {
+    fun PlaceItemLocationScreen(courseViews: List<CourseView>) {
         val placeItemsState = remember { mutableStateOf<List<PlaceItemApiResponse>>(emptyList()) }
         val currentContext = LocalContext.current
         val selectedTabIndex = remember { mutableStateOf(0) } // 현재 선택된 탭의 인덱스를 저장하는 state
@@ -187,12 +183,13 @@ class StepPlaceActivity : ComponentActivity() {
         val tagTitles = listOf("좋아요순", "최신순", "스크랩순")
 
         // 데이터 로드
-        LaunchedEffect(key1 = Unit) {
-            val stepIdx = currentCategoryNumber - 1
-            val category = stepArray[stepIdx].stepCategory
-            val placeItems = getCategoryPlace(category, 1)
+        LaunchedEffect(key1 = courseViews) {
+            if (courseViews.isNotEmpty()) {
+                val category = courseViews[currentCategoryIndex].placeCategory
+                val placeItems = getCategoryPlace(category, 1)
 
-            placeItemsState.value = placeItems.items
+                placeItemsState.value = placeItems.items
+            }
         }
 
         val customGreen = Color(0xFF47A14B)
@@ -286,8 +283,8 @@ class StepPlaceActivity : ComponentActivity() {
     ): PlaceSearchItemApiResponse {
         for (idx in start..start + 3) {
             val response = ApiAuthClient.categoryPlaceService.getCategoryPlace(
-                cityCode = selectedCityCode,
-                districtCode = selectedDistrictCode,
+                cityCode = courseGroup.cityCode,
+                districtCode = courseGroup.districtCode,
                 place = category,
                 start = idx
             )
@@ -300,14 +297,9 @@ class StepPlaceActivity : ComponentActivity() {
 
     private fun applyStepAction(context: Context, placeItemApiResponse: PlaceItemApiResponse) {
         val intent = Intent(context, StepMapActivity::class.java)
-        intent.putExtra(IntentExtra.CITY_NAME.key, selectedCityName)
-        intent.putExtra(IntentExtra.CITY_CODE.key, selectedCityCode)
-        intent.putExtra(IntentExtra.DISTRICT_NAME.key, selectedDistrictName)
-        intent.putExtra(IntentExtra.DISTRICT_CODE.key, selectedDistrictCode)
-        intent.putExtra(IntentExtra.CURRENT_CATEGORY_NUMBER.key, currentCategoryNumber)
-
-        intent.putExtra(IntentExtra.STEPS.key, stepArray)
         intent.putExtra(IntentExtra.SELECTED_PLACE_ITEM.key, placeItemApiResponse)
+        intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
+        intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, currentCategoryIndex)
         context.startActivity(intent)
         finish()
     }

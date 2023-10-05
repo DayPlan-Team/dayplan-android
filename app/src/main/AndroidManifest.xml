@@ -45,6 +45,7 @@
         <activity android:name=".step.StepCategoryActivity"></activity>
         <activity android:name=".step.StepPlaceActivity"></activity>
         <activity android:name=".step.StepMapActivity"></activity>
+        <activity android:name=".coursegroup.CourseGroupActivity"></activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

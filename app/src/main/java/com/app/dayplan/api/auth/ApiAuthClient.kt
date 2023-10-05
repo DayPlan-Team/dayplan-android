@@ -38,4 +38,5 @@ object ApiAuthClient {
 
     val categoryPlaceService: ApiCategoryPlaceService = retrofit.create(ApiCategoryPlaceService::class.java)
     val courseService: ApiCourseService = retrofit.create(ApiCourseService::class.java)
+    val courseGroupService: ApiCourseGroupService = retrofit.create(ApiCourseGroupService::class.java)
 }

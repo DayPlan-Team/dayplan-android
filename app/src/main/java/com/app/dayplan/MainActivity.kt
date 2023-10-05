@@ -3,6 +3,7 @@ package com.app.dayplan
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.app.dayplan.auth.LoginActivity
@@ -35,7 +36,12 @@ class MainActivity : ComponentActivity() {
         val periodicWorkRequest = PeriodicWorkRequestBuilder<UpdateLocationWorker>(10, TimeUnit.MINUTES)
             .build()
 
-        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork(
+                "UpdateLocationWork",
+                ExistingPeriodicWorkPolicy.REPLACE, // 이미 예약된 작업이 있으면 유지
+                periodicWorkRequest
+            )
 
     }
 }

@@ -7,8 +7,10 @@ enum class IntentExtra(
     CITY_CODE("cityCode"),
     DISTRICT_NAME("districtName"),
     DISTRICT_CODE("districtCode"),
-    CURRENT_CATEGORY_NUMBER("currentCategoryNumber"),
+    CURRENT_CATEGORY_INDEX("currentCategoryIndex"),
     STEPS("steps"),
     SELECTED_PLACE_ITEM("selectedPlaceItem"),
-    COURSE_GROUP_Id("courseGroupId"),
+    COURSE_GROUP_ID("courseGroupId"),
+    COURSE_GROUP("courseGroup"),
+
 }
