@@ -6,5 +6,5 @@ data class Steps(
     val stepNumber: Int,
     val stepCategory: PlaceCategory,
     val placeName: String = "",
-    val stage: StepStage = StepStage.START,
+    val stage: CourseStage = CourseStage.START,
 ) : Serializable

@@ -22,6 +22,6 @@ class UpdateLocationWorker(
                 longitude = longitude,
             )
         )
-        return if (response.isSuccessful) Result.success() else Result.retry()
+        return if (response.isSuccessful) Result.success() else Result.failure()
     }
 }

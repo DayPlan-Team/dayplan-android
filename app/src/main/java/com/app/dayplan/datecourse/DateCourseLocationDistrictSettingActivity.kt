@@ -43,10 +43,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.app.dayplan.api.auth.ApiAuthClient
+import com.app.dayplan.coursegroup.CourseGroupApiRequest
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.step.StepCategoryActivity
 import com.app.dayplan.ui.theme.DayplanTheme
+import com.app.dayplan.util.IntentExtra
 import com.app.dayplan.util.startActivityAndFinish
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -129,6 +132,7 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
     fun DistrictCategoryScreen(districts: List<Location> = emptyList()) {
         val currentContext = LocalContext.current
         val contextState = rememberUpdatedState(currentContext)
+        val coroutineScope = rememberCoroutineScope()
         var selectedDistrictCode by remember { mutableStateOf<Long?>(null) }
         var query by remember { mutableStateOf("") } // 검색 쿼리를 저장하기 위한 상태 변수
 
@@ -176,26 +180,44 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
                             .hoverIndicator()
                             .clickable {
                                 contextState.value?.let {
-                                    applyStepAction(it, district)
+                                    coroutineScope.launch {
+                                        applyStepAction(it, district)
+                                    }
                                 }
                             }
                             .then(backgroundModifier)
                     ) {
                         Text(
-                            text = district.name, modifier = Modifier.padding(8.dp))
+                            text = district.name, modifier = Modifier.padding(8.dp)
+                        )
                     }
                 }
             }
         }
     }
-    private fun applyStepAction(context: Context, district: Location) {
-        val intent = Intent(context, StepCategoryActivity::class.java)
-        intent.putExtra("districtName", district.name)
-        intent.putExtra("districtCode", district.code)
-        intent.putExtra("cityName", selectedCityName)
-        intent.putExtra("cityCode", selectedCityCode)
-        context.startActivity(intent)
-        finish()
+
+    private suspend fun applyStepAction(context: Context, district: Location) {
+
+        val courseGroupApiRequest = CourseGroupApiRequest(
+            cityCode = selectedCityCode,
+            districtCode = district.code
+        )
+
+        val response = ApiAuthClient.courseGroupService.upsertCourseGroup(courseGroupApiRequest)
+
+        if (response.isSuccessful) {
+            response.body()?.let { responseBody ->
+                val intent = Intent(context, StepCategoryActivity::class.java)
+//                intent.putExtra("districtName", district.name)
+//                intent.putExtra("districtCode", district.code)
+//                intent.putExtra("cityName", selectedCityName)
+//                intent.putExtra("cityCode", selectedCityCode)
+                intent.putExtra(IntentExtra.COURSE_GROUP.key, responseBody) // 예제로 추가된 코드
+//                intent.putExtra(IntentExtra.COURSE_GROUP_Id.key, responseBody.groupId) // 예제로 추가된 코드
+                context.startActivity(intent)
+                finish()
+            }
+        }
     }
 
 

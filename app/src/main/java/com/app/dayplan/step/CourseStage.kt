@@ -1,7 +1,7 @@
 package com.app.dayplan.step
 
-enum class StepStage {
+enum class CourseStage {
     START,
     CATEGORY_FINISH,
-    MAP_FINISH,
+    PLACE_FINISH,
 }

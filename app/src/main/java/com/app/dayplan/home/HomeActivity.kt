@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.TestModifierUpdaterLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,6 +56,7 @@ import androidx.viewpager2.widget.ViewPager2
 import coil.compose.rememberImagePainter
 import com.app.dayplan.R
 import com.app.dayplan.advertise.ViewPagerAdapter
+import com.app.dayplan.coursegroup.CourseGroupActivity
 import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
 import com.app.dayplan.map.MapRegistrationActivity
 import com.app.dayplan.step.PlaceCategory
@@ -191,7 +191,7 @@ class HomeActivity : ComponentActivity() {
                 text2 = "데이트 코스짜기"
             ) {
                 this@HomeActivity.startActivityAndFinish(
-                    DateCourseLocationCitySettingActivity::class.java
+                    CourseGroupActivity::class.java
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -200,7 +200,7 @@ class HomeActivity : ComponentActivity() {
                 text2 = "코스 둘러보기",
             ) {
                 this@HomeActivity.startActivityAndFinish(
-                    DateCourseLocationCitySettingActivity::class.java
+                    CourseGroupActivity::class.java
                 )
             }
         }
