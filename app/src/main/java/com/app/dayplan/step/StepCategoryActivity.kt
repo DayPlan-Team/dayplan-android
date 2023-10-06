@@ -51,18 +51,37 @@ import com.app.dayplan.course.Course
 import com.app.dayplan.course.CourseView
 import com.app.dayplan.course.CourseViewResponse
 import com.app.dayplan.coursegroup.CourseGroup
+import com.app.dayplan.coursegroup.CourseGroups
 import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.IntentExtra
+import com.app.dayplan.util.intentSerializable
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepCategoryActivity : ComponentActivity() {
 
     private val courseGroup: CourseGroup by lazy {
-        intent.getSerializableExtra(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)!!
+        intent.intentSerializable(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)
+            ?: CourseGroup(
+                groupId = 0L,
+                groupName = "",
+                cityCode = 0L,
+                cityName = "",
+                districtCode = 0L,
+                districtName = "",
+            )
     }
+
+    //        CourseGroup(
+//            groupId = intent.getLongExtra(IntentExtra.COURSE_GROUP_ID.key, 0L),
+//            groupName = intent.getStringExtra(IntentExtra.COURSE_GROUP_NAME.key) ?: "",
+//            cityCode = intent.getLongExtra(IntentExtra.CITY_CODE.key, 0),
+//            cityName = intent.getStringExtra(IntentExtra.CITY_NAME.key) ?: "",
+//            districtCode = intent.getLongExtra(IntentExtra.DISTRICT_CODE.key, 0),
+//            districtName = intent.getStringExtra(IntentExtra.DISTRICT_NAME.key) ?: "",
+//        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -267,7 +286,7 @@ class StepCategoryActivity : ComponentActivity() {
     }
 
 
-    private suspend fun getCourses(): CourseViewResponse{
+    private suspend fun getCourses(): CourseViewResponse {
         try {
             val response = ApiAuthClient.courseService.getCourses(courseGroup.groupId)
 
@@ -306,6 +325,12 @@ class StepCategoryActivity : ComponentActivity() {
             if (response.isSuccessful && response.body() != null) {
                 Log.i("response = ", "response success!!!")
                 val intent = Intent(context, StepPlaceActivity::class.java)
+//                intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, courseGroup.groupId)
+//                intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, courseGroup.groupName)
+//                intent.putExtra(IntentExtra.CITY_CODE.key, courseGroup.cityCode)
+//                intent.putExtra(IntentExtra.CITY_NAME.key, courseGroup.cityName)
+//                intent.putExtra(IntentExtra.DISTRICT_CODE.key, courseGroup.districtCode)
+//                intent.putExtra(IntentExtra.DISTRICT_NAME.key, courseGroup.districtName)
                 intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
                 intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, courseViews.courses.size)
                 context.startActivity(intent)

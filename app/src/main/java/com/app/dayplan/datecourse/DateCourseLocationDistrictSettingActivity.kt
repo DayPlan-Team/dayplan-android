@@ -48,8 +48,6 @@ import com.app.dayplan.home.HomeBar
 import com.app.dayplan.step.StepCategoryActivity
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.IntentExtra
-import com.app.dayplan.util.startActivityAndFinish
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -208,12 +206,16 @@ class DateCourseLocationDistrictSettingActivity : FragmentActivity() {
         if (response.isSuccessful) {
             response.body()?.let { responseBody ->
                 val intent = Intent(context, StepCategoryActivity::class.java)
-//                intent.putExtra("districtName", district.name)
-//                intent.putExtra("districtCode", district.code)
-//                intent.putExtra("cityName", selectedCityName)
-//                intent.putExtra("cityCode", selectedCityCode)
-                intent.putExtra(IntentExtra.COURSE_GROUP.key, responseBody) // 예제로 추가된 코드
-//                intent.putExtra(IntentExtra.COURSE_GROUP_Id.key, responseBody.groupId) // 예제로 추가된 코드
+
+//                intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, responseBody.groupId)
+//                intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, responseBody.groupName)
+//                intent.putExtra(IntentExtra.CITY_CODE.key, responseBody.cityCode)
+//                intent.putExtra(IntentExtra.CITY_NAME.key, responseBody.cityName)
+//                intent.putExtra(IntentExtra.DISTRICT_CODE.key, responseBody.districtCode)
+//                intent.putExtra(IntentExtra.DISTRICT_NAME.key, responseBody.districtName)
+
+                intent.putExtra(IntentExtra.COURSE_GROUP.key, responseBody)
+
                 context.startActivity(intent)
                 finish()
             }
