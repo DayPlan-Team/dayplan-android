@@ -106,7 +106,6 @@ class DateCourseSearchActivity : ComponentActivity() {
             )
 
             if (response.isSuccessful && response.body() != null) {
-                Log.i("response body = ", "${response.body()}")
                 return response.body()!!
             }
 
@@ -116,9 +115,33 @@ class DateCourseSearchActivity : ComponentActivity() {
 
         return null
     }
+
+    private suspend fun getCourseGroupNickName(courseGroupIds: List<Long>): List<CourseGroupWithUserNicknameResponse> {
+        try {
+            val response = ApiAuthClient.courseGroupService.getCourseGroupWithNickName(
+                courseGroupIds = courseGroupIds
+            )
+
+            if (response.isSuccessful && response.body() != null) {
+                Log.i("response nickname = ", "${response.body()}")
+                return response.body()!!
+            }
+
+        } catch (e: Exception) {
+            Log.i("error = ", e.toString())
+        }
+
+        return emptyList()
+    }
+
     @Composable
     fun CourseGroupViewScreen(courseGroupViews: CourseGroupSearchResponse) {
         val courseGroupItems = remember { mutableStateOf<List<CourseGroupItem>>(emptyList()) }
+        val courseGroupWithUserNicknameResponse = remember {
+            mutableStateOf<Map<Long, CourseGroupWithUserNicknameResponse>>(
+                emptyMap()
+            )
+        }
         val currentContext = LocalContext.current
         val selectedTabIndex = remember { mutableStateOf(0) } // 현재 선택된 탭의 인덱스를 저장하는 state
         val selectedTagIndex = remember { mutableStateOf(0) } // 현재 선택된 태그의 인덱스를 저장하는 state
@@ -128,7 +151,12 @@ class DateCourseSearchActivity : ComponentActivity() {
         // 데이터 로드
         LaunchedEffect(key1 = courseGroupViews) {
             if (courseGroupViews.courseGroupItems.isNotEmpty()) {
+                val groupIds = courseGroupViews.courseGroupItems.map {
+                    it.groupId
+                }
                 courseGroupItems.value = courseGroupViews.courseGroupItems
+                courseGroupWithUserNicknameResponse.value = getCourseGroupNickName(groupIds)
+                    .associateBy { it.courseGroupId }
             }
         }
 
@@ -197,7 +225,7 @@ class DateCourseSearchActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .clickable { }
                             ) {
-                                PlaceBox(item)
+                                PlaceBox(item, courseGroupWithUserNicknameResponse.value)
                             }
                         }
                     }
@@ -218,7 +246,7 @@ class DateCourseSearchActivity : ComponentActivity() {
 
 
     @Composable
-    fun PlaceBox(item: CourseGroupItem) {
+    fun PlaceBox(item: CourseGroupItem, nickNameByCourseGroup: Map<Long, CourseGroupWithUserNicknameResponse>) {
         Column {
             Box(
                 modifier = Modifier
@@ -237,8 +265,14 @@ class DateCourseSearchActivity : ComponentActivity() {
                     )
                     Text(
                         text = "코스 개수: ${item.courseCategories.size}",
-                        color = Color.Blue
+                        color = Color.Gray
                     )
+                    nickNameByCourseGroup[item.groupId]?.let {
+                        Text(
+                            text = "작성자: ${nickNameByCourseGroup[item.groupId]?.userNickName}",
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
             Divider(color = Color.Gray, thickness = 1.dp) // 아래의 경계선
