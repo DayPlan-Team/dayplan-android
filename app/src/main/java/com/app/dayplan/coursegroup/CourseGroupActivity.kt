@@ -162,7 +162,7 @@ class CourseGroupActivity : ComponentActivity() {
 
     private suspend fun getCourseGroups(): CourseGroups? {
         try {
-            val response = ApiAuthClient.courseGroupService.getCourseGroups()
+            val response = ApiAuthClient.courseGroupService.getCourseGroup()
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
