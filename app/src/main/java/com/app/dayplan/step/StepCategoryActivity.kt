@@ -74,15 +74,6 @@ class StepCategoryActivity : ComponentActivity() {
             )
     }
 
-    //        CourseGroup(
-//            groupId = intent.getLongExtra(IntentExtra.COURSE_GROUP_ID.key, 0L),
-//            groupName = intent.getStringExtra(IntentExtra.COURSE_GROUP_NAME.key) ?: "",
-//            cityCode = intent.getLongExtra(IntentExtra.CITY_CODE.key, 0),
-//            cityName = intent.getStringExtra(IntentExtra.CITY_NAME.key) ?: "",
-//            districtCode = intent.getLongExtra(IntentExtra.DISTRICT_CODE.key, 0),
-//            districtName = intent.getStringExtra(IntentExtra.DISTRICT_NAME.key) ?: "",
-//        )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -325,12 +316,7 @@ class StepCategoryActivity : ComponentActivity() {
             if (response.isSuccessful && response.body() != null) {
                 Log.i("response = ", "response success!!!")
                 val intent = Intent(context, StepPlaceActivity::class.java)
-//                intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, courseGroup.groupId)
-//                intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, courseGroup.groupName)
-//                intent.putExtra(IntentExtra.CITY_CODE.key, courseGroup.cityCode)
-//                intent.putExtra(IntentExtra.CITY_NAME.key, courseGroup.cityName)
-//                intent.putExtra(IntentExtra.DISTRICT_CODE.key, courseGroup.districtCode)
-//                intent.putExtra(IntentExtra.DISTRICT_NAME.key, courseGroup.districtName)
+
                 intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
                 intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, courseViews.courses.size)
                 context.startActivity(intent)

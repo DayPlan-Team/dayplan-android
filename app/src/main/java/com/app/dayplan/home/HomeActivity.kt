@@ -57,7 +57,7 @@ import coil.compose.rememberImagePainter
 import com.app.dayplan.R
 import com.app.dayplan.advertise.ViewPagerAdapter
 import com.app.dayplan.coursegroup.CourseGroupActivity
-import com.app.dayplan.datecourse.DateCourseLocationCitySettingActivity
+import com.app.dayplan.datecoursesearch.DateCourseLocationCitySearchActivity
 import com.app.dayplan.map.MapRegistrationActivity
 import com.app.dayplan.step.PlaceCategory
 import com.app.dayplan.ui.theme.DayplanTheme
@@ -200,7 +200,7 @@ class HomeActivity : ComponentActivity() {
                 text2 = "코스 둘러보기",
             ) {
                 this@HomeActivity.startActivityAndFinish(
-                    CourseGroupActivity::class.java
+                    DateCourseLocationCitySearchActivity::class.java
                 )
             }
         }

@@ -264,12 +264,6 @@ class StepMapActivity : ComponentActivity() {
                     Log.i("responseBody = ", responseBody.toString())
 
                     val intent = Intent(context, StepCategoryActivity::class.java)
-//                    intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, courseGroup.groupId)
-//                    intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, courseGroup.groupName)
-//                    intent.putExtra(IntentExtra.CITY_CODE.key, courseGroup.cityCode)
-//                    intent.putExtra(IntentExtra.CITY_NAME.key, courseGroup.cityName)
-//                    intent.putExtra(IntentExtra.DISTRICT_CODE.key, courseGroup.districtCode)
-//                    intent.putExtra(IntentExtra.DISTRICT_NAME.key, courseGroup.districtName)
                     intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
                     intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, currentCategoryIndex)
                     context.startActivity(intent)
