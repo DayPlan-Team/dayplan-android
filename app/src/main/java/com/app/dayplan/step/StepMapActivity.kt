@@ -46,6 +46,7 @@ import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.IntentExtra
+import com.app.dayplan.util.intentSerializable
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapView
@@ -58,15 +59,22 @@ import kotlinx.coroutines.launch
 class StepMapActivity : ComponentActivity() {
 
     private val courseGroup: CourseGroup by lazy {
-        intent.getSerializableExtra(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)!!
+        intent.intentSerializable(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)
+            ?: CourseGroup(
+                groupId = 0L,
+                groupName = "",
+                cityCode = 0L,
+                cityName = "",
+                districtCode = 0L,
+                districtName = "",
+            )
     }
-
     private val currentCategoryIndex: Int by lazy {
         intent.getIntExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, 0)
     }
 
     private val selectedPlaceItem: PlaceItemApiResponse by lazy {
-        intent.getSerializableExtra(IntentExtra.SELECTED_PLACE_ITEM.key, PlaceItemApiResponse::class.java)
+        intent.intentSerializable(IntentExtra.SELECTED_PLACE_ITEM.key, PlaceItemApiResponse::class.java)
             ?: PlaceItemApiResponse()
     }
 
@@ -256,6 +264,12 @@ class StepMapActivity : ComponentActivity() {
                     Log.i("responseBody = ", responseBody.toString())
 
                     val intent = Intent(context, StepCategoryActivity::class.java)
+//                    intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, courseGroup.groupId)
+//                    intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, courseGroup.groupName)
+//                    intent.putExtra(IntentExtra.CITY_CODE.key, courseGroup.cityCode)
+//                    intent.putExtra(IntentExtra.CITY_NAME.key, courseGroup.cityName)
+//                    intent.putExtra(IntentExtra.DISTRICT_CODE.key, courseGroup.districtCode)
+//                    intent.putExtra(IntentExtra.DISTRICT_NAME.key, courseGroup.districtName)
                     intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
                     intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, currentCategoryIndex)
                     context.startActivity(intent)

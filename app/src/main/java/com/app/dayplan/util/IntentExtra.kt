@@ -11,6 +11,6 @@ enum class IntentExtra(
     STEPS("steps"),
     SELECTED_PLACE_ITEM("selectedPlaceItem"),
     COURSE_GROUP_ID("courseGroupId"),
+    COURSE_GROUP_NAME("courseGroupName"),
     COURSE_GROUP("courseGroup"),
-
 }

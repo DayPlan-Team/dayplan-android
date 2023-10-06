@@ -46,12 +46,21 @@ import com.app.dayplan.home.HomeBar
 import com.app.dayplan.home.TopBar
 import com.app.dayplan.ui.theme.DayplanTheme
 import com.app.dayplan.util.IntentExtra
+import com.app.dayplan.util.intentSerializable
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class StepPlaceActivity : ComponentActivity() {
 
     private val courseGroup: CourseGroup by lazy {
-        intent.getSerializableExtra(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)!!
+        intent.intentSerializable(IntentExtra.COURSE_GROUP.key, CourseGroup::class.java)
+            ?: CourseGroup(
+                groupId = 0L,
+                groupName = "",
+                cityCode = 0L,
+                cityName = "",
+                districtCode = 0L,
+                districtName = "",
+            )
     }
 
     private val currentCategoryIndex: Int by lazy {
@@ -298,6 +307,12 @@ class StepPlaceActivity : ComponentActivity() {
     private fun applyStepAction(context: Context, placeItemApiResponse: PlaceItemApiResponse) {
         val intent = Intent(context, StepMapActivity::class.java)
         intent.putExtra(IntentExtra.SELECTED_PLACE_ITEM.key, placeItemApiResponse)
+//        intent.putExtra(IntentExtra.COURSE_GROUP_ID.key, courseGroup.groupId)
+//        intent.putExtra(IntentExtra.COURSE_GROUP_NAME.key, courseGroup.groupName)
+//        intent.putExtra(IntentExtra.CITY_CODE.key, courseGroup.cityCode)
+//        intent.putExtra(IntentExtra.CITY_NAME.key, courseGroup.cityName)
+//        intent.putExtra(IntentExtra.DISTRICT_CODE.key, courseGroup.districtCode)
+//        intent.putExtra(IntentExtra.DISTRICT_NAME.key, courseGroup.districtName)
         intent.putExtra(IntentExtra.COURSE_GROUP.key, courseGroup)
         intent.putExtra(IntentExtra.CURRENT_CATEGORY_INDEX.key, currentCategoryIndex)
         context.startActivity(intent)
