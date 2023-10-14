@@ -11,13 +11,13 @@ import retrofit2.http.Path
 interface ApiLocationService {
 
     @Headers(ApiUtil.CONTENT_TYPE_APPLICATION_JSON)
-    @GET("/user/location/city")
+    @GET("/content/area/city")
     suspend fun getCities(): Response<LocationOuterResponse<List<Location>>>
 
 
 
     @Headers(ApiUtil.CONTENT_TYPE_APPLICATION_JSON)
-    @GET("/user/location/city/{cityCode}/districts")
+    @GET("/content/area/city/{cityCode}/districts")
     suspend fun getDistrictsByCityCode(
         @Path("cityCode") cityCode: Long,
     ): Response<LocationOuterResponse<List<Location>>>
